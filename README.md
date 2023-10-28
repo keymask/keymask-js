@@ -1,5 +1,7 @@
 # Keymask-Base41
 
+[![Unit Tests](https://github.com/keymask/keymask-base41/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-base41/actions/workflows/test.yml)
+
 `Keymask-Base41` is a dependency-free Typescript/JavaScript utility that maps
 integers up to 64 bits in length to compact, random-looking character strings.
 
