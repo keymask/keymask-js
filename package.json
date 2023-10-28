@@ -1,0 +1,64 @@
+{
+  "name": "keymask-base41",
+  "version": "0.1.0",
+  "description": "Map sequential IDs or serial numbers to and from random-looking Base41-encoded strings",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint ./src/*.ts ./test/*.ts",
+    "lint:fix": "eslint --fix ./src/*.ts ./test/*.ts",
+    "test": "TS_NODE_PROJECT=./tsconfig.test.json c8 mocha test",
+    "build:clean": "rimraf build/* && rimraf dist/*",
+    "build:tidy": "rimraf dist/build",
+    "build:compile": "tsc",
+    "build:rollup": "rollup --config && eslint --fix ./dist/*.*s",
+    "build": "pnpm run build:clean && pnpm run build:compile && pnpm run build:rollup && pnpm run build:tidy"
+  },
+  "keywords": [
+    "LCG",
+    "linear",
+    "congruential",
+    "generator",
+    "linear congruential generator",
+    "base41",
+    "string",
+    "character",
+    "encoding",
+    "decoding",
+    "obfuscation",
+    "mapping",
+    "database",
+    "id",
+    "key",
+    "mask",
+    "keymask"
+  ],
+  "author": "Adi Turiya <code@turiya.dev>",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "^20.8.7",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "c8": "^8.0.1",
+    "eslint": "^8.52.0",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.1.4",
+    "rollup-plugin-dts": "^6.1.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  }
+}

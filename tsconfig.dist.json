@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2022",                          
+    "module": "es2022",
+    "moduleResolution": "node",                     
+    "noEmitOnError": true,
+    "lib": ["es2022"],                            
+    "strict": true,  
+    "esModuleInterop": false,
+    "rootDir": "./dist",
+    "removeComments": true
+  },
+  "include": ["dist/**/*.*s"]
+}
