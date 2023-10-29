@@ -17,59 +17,34 @@ const lcgMap: (number[] | bigint[])[] = [
   [18446744073709551557n, 811465980874026894n, 18263440312458789471n] // 2^64 - 59
 ];
 
-function nextNumber(value: number, base: number, map: number[]): number {
-  value = value * map[1] % map[0] + base;
-  return value < map[0] ? value : value - map[0] + 1;
-}
-
-function nextBigInt(value: bigint, base: bigint, map: bigint[]): bigint {
-  value = value * map[1] % map[0] + base;
-  return value < map[0] ? value : value - map[0] + 1n;
-}
-
-function previousNumber(value: number, base: number, map: number[]): number {
-  value -= base;
-  return (value > 0 ? value : value + map[0] - 1) * map[2] % map[0];
-}
-
-function previousBigInt(value: bigint, base: bigint, map: bigint[]): bigint {
-  value -= base;
-  return (value > 0 ? value : value + map[0] - 1n) * map[2] % map[0];
-}
-
 export class Generator {
-  private bases: (number | bigint)[];
+  private offsets: (number | bigint)[];
   private bigint: boolean;
 
   constructor(seed?: ArrayBufferLike | ArrayBufferView, bigint: boolean = false) {
-    if (seed && seed.byteLength < 8) {
-      throw new RangeError("If a seed is provided it must be at least 8 bytes long.");
-    }
-    this.bases = new Array(13) as (number | bigint)[];
-    if (seed) {
+    this.offsets = new Array(13) as (number | bigint)[];
+    if (seed && seed.byteLength > 7) {
       if (ArrayBuffer.isView(seed)) {
         seed = seed.buffer;
       }
       seed = seed.slice(0, 8);
-      const u32 = new Uint32Array(seed);
-      const u64 = new BigUint64Array(seed);
-      const n32 = u32[0];
-      const b64 = u64[0];
-      this.bases[1] = n32 % 40;
-      this.bases[2] = n32 % 1020;
-      this.bases[3] = n32 % 65520;
-      this.bases[4] = n32 % 2097142;
-      this.bases[5] = n32 % 67108858;
-      this.bases[6] = b64 % 4294967290n;
-      this.bases[7] = b64 % 137438953446n;
-      this.bases[8] = b64 % 4398046511092n;
-      this.bases[9] = b64 % 281474976710596n;
-      this.bases[10] = b64 % 9007199254740880n;
-      this.bases[11] = b64 % 288230376151711716n;
-      this.bases[12] = b64 % 18446744073709551556n;
+      const n32 = new Uint32Array(seed)[0];
+      const b64 = new BigUint64Array(seed)[0];
+      this.offsets[1] = n32 % 40;
+      this.offsets[2] = n32 % 1020;
+      this.offsets[3] = n32 % 65520;
+      this.offsets[4] = n32 % 2097142;
+      this.offsets[5] = n32 % 67108858;
+      this.offsets[6] = b64 % 4294967290n;
+      this.offsets[7] = b64 % 137438953446n;
+      this.offsets[8] = b64 % 4398046511092n;
+      this.offsets[9] = b64 % 281474976710596n;
+      this.offsets[10] = b64 % 9007199254740880n;
+      this.offsets[11] = b64 % 288230376151711716n;
+      this.offsets[12] = b64 % 18446744073709551556n;
     } else {
       for (let i = 1; i < 13; i++) {
-        this.bases[i] = i < 6 ? 0 : 0n;
+        this.offsets[i] = i < 6 ? 0 : 0n;
       }
     }
     this.bigint = bigint;
@@ -77,30 +52,49 @@ export class Generator {
 
   next(value: number | bigint, mode: number): number | bigint {
     if (!value) {
-      return value;
+      return mode > 10 || this.bigint ? 0n : 0;
     }
-    const map = lcgMap[mode];
-    const base = this.bases[mode];
+    const mod = lcgMap[mode][0];
+    const mult = lcgMap[mode][1];
+    const offset = this.offsets[mode];
 
     if (mode > 5) {
-      const result = nextBigInt(typeof value === "bigint" ? value : BigInt(value), base as bigint, map as bigint[]);
-      return mode > 10 ? result : Number(result);
+      if (typeof value === "number") {
+        value = BigInt(value);
+      }
+      value = value * <bigint>mult % <bigint>mod + <bigint>offset;
+      value = value < <bigint>mod ? value : value - <bigint>mod + 1n;
+      return mode > 10 || this.bigint ? value : Number(value);
     }
-    return nextNumber(typeof value === "number" ? value : Number(value), base as number, map as number[]);
+    if (typeof value === "bigint") {
+      value = Number(value);
+    }
+    value = value * <number>mult % <number>mod + <number>offset;
+    value = value < <number>mod ? value : value - <number>mod + 1;
+    return this.bigint ? BigInt(value) : value;
   }
 
   previous(value: number | bigint, mode: number): number | bigint {
     if (!value) {
-      return value;
+      return mode > 10 || this.bigint ? 0n : 0;
     }
-    const map = lcgMap[mode];
-    const base = this.bases[mode];
+    const mod = lcgMap[mode][0];
+    const mult = lcgMap[mode][2];
+    const offset = this.offsets[mode];
 
     if (mode > 5) {
-      const result = previousBigInt(typeof value === "bigint" ? value : BigInt(value), base as bigint, map as bigint[]);
-      return mode > 10 || this.bigint ? result : Number(result);
+      if (typeof value === "number") {
+        value = BigInt(value);
+      }
+      value -= <bigint>offset;
+      value = (value > 0 ? value : value + <bigint>mod - 1n) * <bigint>mult % <bigint>mod;
+      return mode > 10 || this.bigint ? value : Number(value);
     }
-    const n = previousNumber(typeof value === "number" ? value : Number(value), base as number, map as number[]);
-    return this.bigint ? BigInt(n) : n;
+    if (typeof value === "bigint") {
+      value = Number(value);
+    }
+    value -= <number>offset;
+    value = (value > 0 ? value : value + <number>mod - 1) * <number>mult % <number>mod;
+    return this.bigint ? BigInt(value) : value;
   }
 }

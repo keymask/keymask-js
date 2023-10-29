@@ -10,15 +10,6 @@ describe("Generator", () => {
       equal(typeof generator.next, "function");
       equal(typeof generator.previous, "function");
     });
-
-    it("should throw error for invalid seed", () => {
-      try {
-        new Generator(new Uint8Array([1, 2, 3]));
-      } catch (error) {
-        equal(error instanceof RangeError, true);
-        equal((error as RangeError).message, "If a seed is provided it must be at least 8 bytes long.");
-      }
-    });
   });
 
   describe("No offset", () => {
