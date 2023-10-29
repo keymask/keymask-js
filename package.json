@@ -1,6 +1,6 @@
 {
   "name": "keymask-base41",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Map sequential IDs or serial numbers to and from random-looking Base41-encoded strings",
   "type": "module",
   "exports": {
