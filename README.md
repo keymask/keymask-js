@@ -10,7 +10,7 @@ conceal the underlying number sequence, then the output is encoded using a
 Base41 encoding scheme.
 
 ```
-2097142 -> "cWCLd" -> 2097142
+2097142 -> "cWCLd"
 ```
 
 The Keymask instance can be personalized using a 256-bit seed value. As long as
@@ -22,7 +22,7 @@ reverse map the encoded values.
 Serial numbers and sequential database IDs are extremely convenient and useful,
 however, when displayed publicly they can leak information about system
 internals, such as how old a given record is, or the frequency of record
-creation (cf.
+creation (see
 ["German tank problem"](https://search.brave.com/search?q=german+tank+problem)).
 
 `Keymask-Base41` encodes serial numbers in such a way that they can be
