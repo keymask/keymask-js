@@ -203,8 +203,8 @@ export class Base41 {
       blocks.forEach((block, index) => {
         final = index === blocks.length - 1;
         result += this.encodeValue(
-          block, 
-          final ? length || this.encodingLength(block) : 12, 
+          block,
+          final ? length || this.encodingLength(block) : 12,
           !final || this.pad);
       });
 
@@ -221,7 +221,7 @@ export class Base41 {
     for (let i = 0; i < raw.length; i++) {
       raw[i] = this.chars.indexOf(value.charAt(i));
     }
-    
+
     if (this.bigint || bigint) {
       return restoreBigInt(raw);
     }
