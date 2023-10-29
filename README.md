@@ -5,41 +5,43 @@
 `Keymask-Base41` is a dependency-free Typescript/JavaScript utility that maps
 integers up to 64 bits in length to compact, random-looking character strings.
 
-Values are first modulated by a Linear Congruential Generator so as to conceal
-the underlying number sequence, then the output is encoded using a Base41
-encoding scheme.
+Values are first transformed by a Linear Congruential Generator so as to
+conceal the underlying number sequence, then the output is encoded using a
+Base41 encoding scheme.
 
-The LCG and the Base41 encoding can be personalized using a 256-bit seed value.
-As long as you keep this value secret, it will be extremely difficult for
-anyone to reverse map encoded values to their original numeric sequence.
-(Please note, however, that the mapping operation is not cryptographically
-secure, it merely obfuscates the underlying numeric sequence.)
+```
+2097142 -> "cWCLd" -> 2097142
+```
+
+The Keymask instance can be personalized using a 256-bit seed value. As long as
+you keep this value secret, it will be extremely difficult for anyone to
+reverse map the encoded values.
 
 ## Motivation
 
-Serial numbers and sequential database IDs are extremely common and useful,
+Serial numbers and sequential database IDs are extremely convenient and useful,
 however, when displayed publicly they can leak information about system
 internals, such as how old a given record is, or the frequency of record
 creation (cf.
 ["German tank problem"](https://search.brave.com/search?q=german+tank+problem)).
 
-`Keymask-Base41` encodes serial numbers so that they can be displayed to
-end-users without revealing these kinds of details.
+`Keymask-Base41` encodes serial numbers in such a way that they can be
+displayed to end-users without revealing these kinds of details.
 
 ## Why Base41?
 
-TL;DR: Efficient, URL-safe, free of visualy similar characters, unikely to form
-recognizable words and therefore "safe for all audiences".
+**TL;DR:** Efficient, URL-safe, free of visualy similar characters, unikely to
+form recognizable words or phrases.
 
 Base41 is a highly efficient encoding for 16-, 32- and 64-bit values,
 comparable to Base57 or Base85 in this respect. Whereas Base85 encodes 64 bits
-to 10 characters, Base41 requires 12 characters to encode the same value. (Note
-that the decimal representation of a 64-bit value requires 20 characters and
-the hexadecimal, 16 characters. It can be said that Base41 is 25% more
-efficient than hexadecimal and 40% more efficient than decimal, but 20% *less*
-efficient than Base85.)
+to 10 characters, Base41 requires 12 characters. (Note that the decimal
+representation of a 64-bit value requires 20 characters and the hexadecimal, 16
+characters. It can therefore be said that Base41 is 25% more efficient than
+hexadecimal and 40% more efficient than decimal, but 20% *less* efficient than
+Base85.)
 
-The primary advantage that Base41 holds over Base85 relates to its absence of
+The primary advantage that Base41 holds over Base85 is that it is free of any
 special characters, which makes it suitable for use in URLs or other places
 where non-alphanumeric characters have special meanings or functions. Base85 is
 more compact, but less versatile, as its output will sometimes need to be
@@ -50,17 +52,15 @@ For its part, Base57 (or the somewhat more common Base58) is also free of
 special characters, therefore URL-safe. However, since it includes virtually
 the full range of alphanumeric characters, encoded values can inadvertently
 contain recognizable words, phrases or slang, including potentially offensive
-language. For example, the Base58 encoding of the number `9876400` is
-"scum"; there are of course much more vulgar words that can be produced, in any
-number of languages. This can be problematic when the encoded values are
+language. This can occasionally be problematic when the encoded values are
 associated with human users (for example, a user id) and visible to them (for
 example, in the URL of their public profile page).
 
 Dropping down to Base41 allows us to remove all vowels and numerals from the
-encoding alphabet, which makes it far less likely (virtually impossible) to
-generate offensive character combinations. It is therefore both URL-safe and
+encoding alphabet, which makes it virtually impossible to generate crude or
+otherwise offensive character combinations. It is therefore both URL-safe and
 "safe for all audiences". In addition, it is free of commonly confused
-character sets, including the main culprits, `O` / `0` and `l` / `I` / `1`.
+character sets, including `O` / `0` and `l` / `I` / `1`.
 
 ## Installation
 
@@ -71,10 +71,8 @@ manager (npm, yarn, pnpm...).
 
 The module exports three classes, `Keymask`, `Generator` (the LCG) and
 `Base41` (the encoder). These can be used independently of each other if need
-be (for example, you may wish to use the `Base41` encoding directly if your
-raw values are already randomized). For the most part, however, the `Keymask`
-class is all you need, as it presents a simple unified interface to the
-supporting classes.
+be. However, for the most part, the main `Keymask` class is all you need, as it
+presents a simple unified interface to the other two.
 
 The `Keymask` class constructor can be passed an object containing various
 optional settings, described below. The default constructor will create an
@@ -84,7 +82,7 @@ either a `number` or a `bigint`, depending again on the magnitude of the value.
 
 **Example**
 
-```
+```JavaScript
 import { Keymask } from "keymask-base41";
 
 const keymask = new Keymask();
@@ -105,20 +103,20 @@ allows both the LCG and the Base41 encoding to be customized. If it is longer
 than `32` bytes, only the first `32` bytes will be used.
 
 If the seed is *less* than `32` bytes, then only one or the other of the LCG or
-the Base41 encoding will be seeded. If the seed is less than `24` bytes, then
+the Base41 encoding will be seeded: if the seed is less than `24` bytes, then
 the first `8` bytes will be used to initialize the LCG; if it is between `24`
 and `31` bytes, then the first `24` bytes will be used to shuffle the Base41
 encoding alphabet. Seeds less than `8` bytes long will be ignored.
 
 Providing a full, randomized `32`-byte `seed` is highly recommended, as it
 means the mappings between inputs and outputs will be extremely difficult to
-predict. If possible, the `seed` should be kept secret. At the same time, it
-should generally not change for the lifetime of your application (doing so
-would make it impossible to unmask previously masked values).
+predict. If possible, the `seed` should be kept secret. However, it should
+generally not change for the lifetime of your application (doing so would make
+it impossible to unmask previously masked values).
 
 **Example**
 
-```
+```JavaScript
 import { Keymask } from "keymask-base41";
 
 const keymask = new Keymask({
@@ -140,14 +138,16 @@ console.log(unmasked); // 123456789
 
 The output length(s) can be explicitly defined by providing a number or an
 array of numbers to the `outputs` option. If it is a single number, it defines
-the minimum output length; values that exceed the minimum length will scale
-normally, with additional characters added as needed, up to a maximum of 12.
+the minimum output length; values that exceed this minimum length will scale
+automatically, with additional characters added as needed.
 
 If an array of numbers is provided, they will define successive allowable
 output lengths. If the highest provided output length is less than 12, longer
-outputs will scale normally, as above.
+outputs will scale automatically, as above. If you do not want this
+auto-scaling behavior, be sure to include `12` as the last value in the array.
 
-Output lengths must be between 1 and 12.
+Output lengths must be between 1 and 12. Other values will either be ignored
+or clamped to this range.
 
 Providing a minimum output length is generally recommended, because short
 sequences are easier to reverse-map and may leak information about your
@@ -158,12 +158,12 @@ the fact that they are all 1 character long may allow information about your
 seed to be deduced by anyone who is able to observe a series of values.
 
 This setting should generally not be changed for the lifetime of your
-application, as this *may* interfere with the ability to unmask previously
+application, as this can interfere with the ability to unmask previously
 masked values.
 
 **Example**
 
-```
+```JavaScript
 import { Keymask } from "keymask-base41";
 
 const keymask = new Keymask({
@@ -180,13 +180,13 @@ console.log(unmasked); // 12
 ### `bigint`
 
 Normally, the return type of the `unmask` operation will depend on the encoding
-range (encodings of length 11 or 12 will be unmasked as a `bigint`). If you
+range (11- or 12-character encodings will be unmasked as a `bigint`). If you
 want *all* values to be returned as a `bigint`, regardless of their magnitude,
 then supply the option `bigint: true`.
 
 **Example**
 
-```
+```JavaScript
 import { Keymask } from "keymask-base41";
 
 const keymask = new Keymask({
@@ -202,22 +202,14 @@ console.log(unmasked); // 123456789n
 
 ## Performance
 
-The LCG transformation involves one multiplication, one modulus operation
-(division) and 1-3 additions or subtractions, plus some table lookups, logical
-branches, function invocations and possible type conversions. It is generally
-extremely fast.
+Both the Linear Congruential Generator and the Base41 encoding are extremely
+simple operations, with execution times measured in microseconds or fractions
+of a microsecond. In most systems, this has very little potential of forming
+a bottleneck (so long as you are processing less than ~1 million per second).
 
-The Base41 encoding involves two divisions and one string concatenation per
-output character, plus some table lookups, logical branches, function
-invocations and possible type conversions. It is also generally very fast,
-though naturally longer outputs are somewhat slower to generate.
-
-On commodity hardware, with 32-bit inputs and 6-character outputs, single
-invocations of `mask` take on the order of 10 microseconds, whereas a tight
-loop of one million invocations takes an average of around 220 nanoseconds per
-call. In other words, it is possible to compute upwards of a million keymasks
-per second.
-
-The performance for 12-character outputs is not noticeably different,
-suggesting that the overhead of the function calls and table lookups outweigh
-the raw operational cost of performing the encoding.
+On commodity hardware (2020 M1 Macbook Air), a single invocation of
+`Keymask.mask()` takes on the order of 10-20 microseconds (dominated by the
+LCG), whereas a tight loop of one million invocations takes an average of
+around 0.22 microseconds per call (dominated by the Base41 encoding). As is
+often the case, performance characteristics differ substantially depending on
+whether or not the code is being executed by the JIT compiler.
