@@ -4,7 +4,7 @@ import { Keymask } from "../src/";
 describe("Keymask", () => {
   describe("Default options", () => {
     const keymask = new Keymask();
-    
+
     it("should mask and unmask in range 1", () => {
       equal(keymask.mask(1), "h");
       equal(keymask.mask(40), "T");
@@ -92,7 +92,7 @@ describe("Keymask", () => {
 
   describe("Bigint output", () => {
     const keymask = new Keymask({ bigint: true });
-    
+
     it("should mask and unmask in range 1", () => {
       equal(keymask.mask(1n), "h");
       equal(keymask.mask(40n), "T");
@@ -182,7 +182,7 @@ describe("Keymask", () => {
     const keymask = new Keymask({
       outputs: [5, 7, 9]
     });
-    
+
     it("should mask and unmask in range 1", () => {
       equal(keymask.mask(1), "nNHVD");
       equal(keymask.mask(40), "bbQnB");

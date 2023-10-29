@@ -19,7 +19,7 @@ module.exports = {
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
       ],
       parserOptions: {
-        project: "tsconfig.json",
+        project: "tsconfig.test.json",
         tsconfigRootDir: __dirname,
       }
     },
@@ -44,10 +44,11 @@ module.exports = {
     sourceType: "module"
   },
   rules: {
-    indent: ["error", 2, {
+    indent: ["warn", 2, {
       SwitchCase: 1
     }],
-    quotes: ["error", "double"]
+    quotes: ["warn", "double"],
+    "no-trailing-spaces": "warn"
   },
   root: true
 };
