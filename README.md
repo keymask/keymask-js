@@ -6,16 +6,18 @@
 integers up to 64 bits in length to compact, random-looking character strings.
 
 Values are first transformed by a Linear Congruential Generator so as to
-conceal the underlying number sequence, then the output is encoded using a
+obfuscate the underlying number sequence, then the output is encoded using a
 Base41 encoding scheme.
 
 ```
-2097142 -> "cWCLd"
+1 -> "FyFLmR"
+2 -> "JwKVWj"
+3 -> "XcCjDG"
 ```
 
 The Keymask instance can be personalized using a 256-bit seed value. As long as
-you keep this value secret, it will be extremely difficult for anyone to
-reverse map the encoded values.
+you keep this value secret, it will be extremely difficult for anyone who
+doesn't know the seed to reverse map the encoded values.
 
 ## Motivation
 
@@ -30,8 +32,8 @@ displayed to end-users without revealing these kinds of details.
 
 ## Why Base41?
 
-**TL;DR:** Efficient, URL-safe, free of visualy similar characters, unikely to
-form recognizable words or phrases.
+**TL;DR:** Efficient, URL-safe, free of visualy similar characters, extremely
+unikely to form recognizable words or phrases.
 
 Base41 is a highly efficient encoding for 16-, 32- and 64-bit values,
 comparable to Base57 or Base85 in this respect. Whereas Base85 encodes 64 bits
@@ -52,9 +54,9 @@ For its part, Base57 (or the somewhat more common Base58) is also free of
 special characters, therefore URL-safe. However, since it includes virtually
 the full range of alphanumeric characters, encoded values can inadvertently
 contain recognizable words, phrases or slang, including potentially offensive
-language. This can occasionally be problematic when the encoded values are
-associated with human users (for example, a user id) and visible to them (for
-example, in the URL of their public profile page).
+language. This can be problematic when the encoded values are associated with
+human users (for example, a user id) and visible to them (for example, in the
+URL of their public profile page).
 
 Dropping down to Base41 allows us to remove all vowels and numerals from the
 encoding alphabet, which makes it virtually impossible to generate crude or
@@ -70,9 +72,9 @@ manager (npm, yarn, pnpm...).
 ## Usage
 
 The module exports three classes, `Keymask`, `Generator` (the LCG) and
-`Base41` (the encoder). These can be used independently of each other if need
-be. However, for the most part, the main `Keymask` class is all you need, as it
-presents a simple unified interface to the other two.
+`Base41` (the encoder). The LCG and encoder can be used independently of each
+other if need be. However, the main `Keymask` class presents a simple unified
+interface to the supporting classes and will typically be all you need.
 
 The `Keymask` class constructor can be passed an object containing various
 optional settings, described below. The default constructor will create an
@@ -90,7 +92,7 @@ const keymask = new Keymask();
 const masked = keymask.mask(123456789);
 const unmasked = keymask.unmask(masked);
 
-console.log(masked); // "wZnfgq"
+console.log(masked); // "wMjMGR"
 console.log(unmasked); // 123456789
 ```
 
@@ -129,7 +131,7 @@ const keymask = new Keymask({
 const masked = keymask.mask(123456789);
 const unmasked = keymask.unmask(masked);
 
-console.log(masked); // "znrdFM"
+console.log(masked); // "KbxsJQ"
 console.log(unmasked); // 123456789
 
 ```
@@ -173,7 +175,7 @@ const keymask = new Keymask({
 const masked = keymask.mask(12);
 const unmasked = keymask.unmask(masked);
 
-console.log(masked); // "YmMrxk"
+console.log(masked); // "pKJhNV"
 console.log(unmasked); // 12
 ```
 
@@ -196,7 +198,7 @@ const keymask = new Keymask({
 const masked = keymask.mask(123456789n);
 const unmasked = keymask.unmask(masked);
 
-console.log(masked); // "wZnfgq"
+console.log(masked); // "wMjMGR"
 console.log(unmasked); // 123456789n
 ```
 
@@ -204,12 +206,16 @@ console.log(unmasked); // 123456789n
 
 Both the Linear Congruential Generator and the Base41 encoding are extremely
 simple operations, with execution times measured in microseconds or fractions
-of a microsecond. In most systems, this has very little potential of forming
-a bottleneck (so long as you are processing less than ~1 million per second).
+of a microsecond. In most systems, there is very little chance that Keymask
+computations will form a significant bottleneck (provided you are processing
+less than ~1 million per second).
 
 On commodity hardware (2020 M1 Macbook Air), a single invocation of
-`Keymask.mask()` takes on the order of 10-20 microseconds (dominated by the
-LCG), whereas a tight loop of one million invocations takes an average of
-around 0.22 microseconds per call (dominated by the Base41 encoding). As is
-often the case, performance characteristics differ substantially depending on
-whether or not the code is being executed by the JIT compiler.
+`Keymask.mask()` takes on the order of 20 microseconds (irrespective of output
+length), whereas a tight loop of one million invocations takes an average of
+between 0.2 and 0.7 microseconds per call (strongly dependent on the output
+length). As is often the case, performance characteristics differ substantially
+depending on whether or not the code is being executed by the JIT compiler.
+
+For best performance, the `Keymask` class instance should be cached for
+repeated usage.
