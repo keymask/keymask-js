@@ -1,26 +1,8 @@
-import { KeymaskOptions } from "./index";
-
 const alphabet: string[] = [
   "B", "C", "D", "F", "G", "H", "J", "K", "L", "M", "N",
   "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z",
   "b", "c", "d", "f", "g", "h", "j", "k", "m", "n",
   "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"
-];
-
-const limits: bigint[] = [
-  0n,
-  41n,
-  1021n,
-  65521n,
-  2097143n,
-  67108859n,
-  4294967291n,
-  137438953447n,
-  4398046511093n,
-  281474976710597n,
-  9007199254740881n,
-  288230376151711717n,
-  18446744073709551557n
 ];
 
 const factors: number[] = [
@@ -87,51 +69,17 @@ function restoreBigInt(raw: Uint8Array): bigint {
 
 export class Base41 {
   private chars: string[];
-  private outputs: number[];
-  private bigint: boolean;
-  private fluid : boolean;
 
-  constructor(options?: KeymaskOptions) {
-    options = options || {};
-
-    const seed = options.seed;
+  constructor(seed?: ArrayBufferLike | ArrayBufferView) {
     if (seed && seed.byteLength !== 24) {
-      throw new RangeError("If seed is provided it must be 24 bytes long.");
+      const seedBuffer = new ArrayBuffer(24);
+      if (ArrayBuffer.isView(seed)) {
+        seed = seed.buffer;
+      }
+      new Uint8Array(seedBuffer).set(new Uint8Array(seed.slice(0, 24)));
+      seed = seedBuffer;
     }
     this.chars = shuffleAlphabet(ArrayBuffer.isView(seed) ? seed.buffer : seed);
-
-    const outputs = options.outputs;
-    if (Array.isArray(outputs)) {
-      this.fluid = false;
-      this.outputs = outputs.filter((output) => output > 0 && output < 13).sort((a, b) => a - b);
-    } else {
-      this.fluid = true;
-      this.outputs = [Math.min(Math.max(outputs || 1, 1), 12)];
-    }
-
-    this.bigint = !!options.bigint;
-  }
-
-  encodingLength(value: number | bigint): number {
-    let length = 12;
-    let output = 0;
-    value = typeof value === "bigint" ? value : BigInt(value);
-    for (let i = 0; i < this.outputs.length; i++) {
-      output = this.outputs[i];
-      if (value < limits[output]) {
-        length = output;
-        break;
-      }
-    }
-    if (length === 12 && this.fluid || value >= limits[output]) {
-      for (let i = this.outputs[0] + 1; i < 12; i++) {
-        if (value < limits[i]) {
-          length = i;
-          break;
-        }
-      }
-    }
-    return length;
   }
 
   private encodeValue(value: number | bigint, length: number): string {
@@ -157,7 +105,7 @@ export class Base41 {
     return result;
   }
 
-  encode(value: number | bigint | ArrayBufferLike | ArrayBufferView, length?: number): string {
+  encode(value: number | bigint | ArrayBufferLike | ArrayBufferView, length: number): string {
     let result = "";
 
     if (typeof value === "object") {
@@ -175,12 +123,12 @@ export class Base41 {
         final = index === blocks.length - 1;
         result += this.encodeValue(
           block,
-          final ? length || this.encodingLength(block) : 12,
+          final ? length : 12,
         );
       });
 
     } else {
-      result = this.encodeValue(value, length || this.encodingLength(value));
+      result = this.encodeValue(value, length);
     }
 
     return result;
@@ -193,7 +141,7 @@ export class Base41 {
       raw[i] = this.chars.indexOf(value.charAt(i));
     }
 
-    if (this.bigint || bigint) {
+    if (bigint) {
       return restoreBigInt(raw);
     }
 
