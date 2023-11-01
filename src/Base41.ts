@@ -113,17 +113,14 @@ export class Base41 {
         value = value.buffer;
       }
 
-      const values = new Uint8Array(value);
-      const blocks = new BigUint64Array(Math.ceil(values.length / 8));
-      const bytes = new Uint8Array(blocks.buffer);
-      bytes.set(values);
+      const blocks = new BigUint64Array(Math.ceil(value.byteLength / 8));
+      new Uint8Array(blocks.buffer).set(new Uint8Array(value));
 
-      let final: boolean;
+      const last = blocks.length - 1;
       blocks.forEach((block, index) => {
-        final = index === blocks.length - 1;
         result += this.encodeValue(
           block,
-          final ? length : 12,
+          index === last ? length : 12,
         );
       });
 
