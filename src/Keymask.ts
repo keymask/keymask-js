@@ -37,7 +37,7 @@ export class Keymask {
         delete options.seed;
       }
     }
-    this.base41 = new Base41({ ...options, prime: true, pad: true });
+    this.base41 = new Base41(options);
   }
 
   mask(value: number | bigint): string {

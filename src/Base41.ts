@@ -7,23 +7,7 @@ const alphabet: string[] = [
   "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"
 ];
 
-const binaryLimits: bigint[] = [
-  0n,
-  32n,
-  1024n,
-  65536n,
-  2097152n,
-  67108864n,
-  4294967296n,
-  137438953472n,
-  4398046511104n,
-  281474976710656n,
-  9007199254740992n,
-  288230376151711740n,
-  18446744073709552000n
-];
-
-const primeLimits: bigint[] = [
+const limits: bigint[] = [
   0n,
   41n,
   1021n,
@@ -101,20 +85,13 @@ function restoreBigInt(raw: Uint8Array): bigint {
   return n;
 }
 
-export interface Base41Options extends KeymaskOptions {
-  prime?: boolean;
-  pad?: boolean;
-}
-
 export class Base41 {
   private chars: string[];
   private outputs: number[];
-  private limits: bigint[];
   private bigint: boolean;
   private fluid : boolean;
-  private pad: boolean;
 
-  constructor(options?: Base41Options) {
+  constructor(options?: KeymaskOptions) {
     options = options || {};
 
     const seed = options.seed;
@@ -133,8 +110,6 @@ export class Base41 {
     }
 
     this.bigint = !!options.bigint;
-    this.limits = options.prime ? primeLimits : binaryLimits;
-    this.pad = options.pad === undefined ? true : options.pad;
   }
 
   encodingLength(value: number | bigint): number {
@@ -143,14 +118,14 @@ export class Base41 {
     value = typeof value === "bigint" ? value : BigInt(value);
     for (let i = 0; i < this.outputs.length; i++) {
       output = this.outputs[i];
-      if (value < this.limits[output]) {
+      if (value < limits[output]) {
         length = output;
         break;
       }
     }
-    if (length === 12 && this.fluid || value >= this.limits[output]) {
+    if (length === 12 && this.fluid || value >= limits[output]) {
       for (let i = this.outputs[0] + 1; i < 12; i++) {
-        if (value < this.limits[i]) {
+        if (value < limits[i]) {
           length = i;
           break;
         }
@@ -159,15 +134,11 @@ export class Base41 {
     return length;
   }
 
-  private encodeValue(value: number | bigint, length: number, pad: boolean): string {
+  private encodeValue(value: number | bigint, length: number): string {
     let n: number;
     let result = "";
 
     for (let i = 0; i < length; i++) {
-      if (!pad && !value && i >= this.outputs[this.outputs.length - 1]) {
-        break;
-      }
-
       if (value) {
         if (typeof value === "bigint") {
           n = Number(value % 41n);
@@ -205,11 +176,11 @@ export class Base41 {
         result += this.encodeValue(
           block,
           final ? length || this.encodingLength(block) : 12,
-          !final || this.pad);
+        );
       });
 
     } else {
-      result = this.encodeValue(value, length || this.encodingLength(value), this.pad);
+      result = this.encodeValue(value, length || this.encodingLength(value));
     }
 
     return result;
