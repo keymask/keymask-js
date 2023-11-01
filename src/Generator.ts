@@ -27,25 +27,26 @@ export class Generator {
 
   constructor(seed?: ArrayBufferLike | ArrayBufferView, bigint: boolean = false) {
     this.offsets = new Array(13) as (number | bigint)[];
-    if (seed && seed.byteLength > 7) {
+    if (seed && seed.byteLength >= 8) {
       if (ArrayBuffer.isView(seed)) {
         seed = seed.buffer;
       }
       seed = seed.slice(0, 8);
-      const n32 = new Uint32Array(seed)[0];
-      const b64 = new BigUint64Array(seed)[0];
+      const a32 = new Uint32Array(seed);
+      const n32 = a32[0] ^ a32[1];
+      const n64 = new BigUint64Array(seed)[0];
       this.offsets[1] = n32 % 40;
       this.offsets[2] = n32 % 1020;
       this.offsets[3] = n32 % 65520;
       this.offsets[4] = n32 % 2097142;
       this.offsets[5] = n32 % 67108858;
-      this.offsets[6] = b64 % 4294967290n;
-      this.offsets[7] = b64 % 137438953446n;
-      this.offsets[8] = b64 % 4398046511092n;
-      this.offsets[9] = b64 % 281474976710596n;
-      this.offsets[10] = b64 % 9007199254740880n;
-      this.offsets[11] = b64 % 288230376151711716n;
-      this.offsets[12] = b64 % 18446744073709551556n;
+      this.offsets[6] = BigInt(n32 % 4294967290);
+      this.offsets[7] = n64 % 137438953446n;
+      this.offsets[8] = n64 % 4398046511092n;
+      this.offsets[9] = n64 % 281474976710596n;
+      this.offsets[10] = n64 % 9007199254740880n;
+      this.offsets[11] = n64 % 288230376151711716n;
+      this.offsets[12] = n64 % 18446744073709551556n;
     } else {
       for (let i = 1; i < 13; i++) {
         this.offsets[i] = i < 6 ? 0 : 0n;
@@ -54,21 +55,21 @@ export class Generator {
     this.bigint = bigint;
   }
 
-  next(value: number | bigint, mode: number): number | bigint {
+  next(value: number | bigint, range: number): number | bigint {
     if (!value) {
-      return mode > 10 || this.bigint ? 0n : 0;
+      return range > 10 || this.bigint ? 0n : 0;
     }
-    const mod = lcgMap[mode][0];
-    const mult = lcgMap[mode][1];
-    const offset = this.offsets[mode];
+    const mod = lcgMap[range][0];
+    const mult = lcgMap[range][1];
+    const offset = this.offsets[range];
 
-    if (mode > 5) {
+    if (range > 5) {
       if (typeof value === "number") {
         value = BigInt(value);
       }
       value = value * <bigint>mult % <bigint>mod + <bigint>offset;
       value = value < <bigint>mod ? value : value - <bigint>mod + 1n;
-      return mode > 10 || this.bigint ? value : Number(value);
+      return range > 10 || this.bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);
@@ -78,21 +79,21 @@ export class Generator {
     return this.bigint ? BigInt(value) : value;
   }
 
-  previous(value: number | bigint, mode: number): number | bigint {
+  previous(value: number | bigint, range: number): number | bigint {
     if (!value) {
-      return mode > 10 || this.bigint ? 0n : 0;
+      return range > 10 || this.bigint ? 0n : 0;
     }
-    const mod = lcgMap[mode][0];
-    const mult = lcgMap[mode][2];
-    const offset = this.offsets[mode];
+    const mod = lcgMap[range][0];
+    const mult = lcgMap[range][2];
+    const offset = this.offsets[range];
 
-    if (mode > 5) {
+    if (range > 5) {
       if (typeof value === "number") {
         value = BigInt(value);
       }
       value -= <bigint>offset;
       value = (value > 0 ? value : value + <bigint>mod - 1n) * <bigint>mult % <bigint>mod;
-      return mode > 10 || this.bigint ? value : Number(value);
+      return range > 10 || this.bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);
