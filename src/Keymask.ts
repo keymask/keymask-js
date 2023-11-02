@@ -42,6 +42,7 @@ export type KeymaskOptions = {
   seed?: ArrayBufferLike | ArrayBufferView;
   size?: number | number[];
   bigint?: boolean;
+  encoder?: Base41;
 };
 
 export class Keymask {
@@ -52,30 +53,26 @@ export class Keymask {
   constructor(options?: KeymaskOptions) {
     options = options || {} as KeymaskOptions;
 
-    let seed = options.seed;
-    if (seed && seed.byteLength > 7) {
-      if (ArrayBuffer.isView(seed)) {
-        seed = seed.buffer;
-      }
-      if (seed.byteLength < 24) {
-        this.generator = new Generator(seed, options.bigint);
-        delete options.seed;
+    if (options.encoder) {
+      this.base41 = options.encoder;
+      this.generator = new Generator(options.seed, options.bigint);
 
-      } else if (seed.byteLength < 32) {
-        this.generator = new Generator(void 0, options.bigint);
-        options.seed = seed.slice(0, 24);
-
-      } else {
-        this.generator = new Generator(seed, options.bigint);
-        options.seed = seed.slice(8, 32);
-      }
     } else {
-      this.generator = new Generator(void 0, options.bigint);
+      let seed = options.seed;
       if (seed) {
-        delete options.seed;
+        if (ArrayBuffer.isView(seed)) {
+          seed = seed.buffer;
+        }
+        this.base41 = new Base41(seed.slice(0, 24));
+        this.generator = new Generator(
+          seed.byteLength < 32 ? void 0 : seed.slice(24),
+          options.bigint
+        );
+      } else {
+        this.base41 = new Base41();
+        this.generator = new Generator(void 0, options.bigint);
       }
     }
-    this.base41 = new Base41(options.seed);
 
     const sizes = options.size;
     if (Array.isArray(sizes)) {
