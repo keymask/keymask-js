@@ -27,11 +27,7 @@ if (test === "generator") {
   console.log("");
 
 } else if (test === "base41") {
-  const base41 = new Base41({
-    outputs: length,
-    pad: true,
-    prime: true
-  });
+  const base41 = new Base41();
   base41.encode(1);
 
   for (let i = 1; i <= n; i++) {
@@ -47,7 +43,7 @@ if (test === "generator") {
 
 } else if (test === "keymask") {
   const keymask = new Keymask({
-    outputs: length
+    size: length
   });
   keymask.mask(1);
 

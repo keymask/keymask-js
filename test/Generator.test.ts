@@ -221,8 +221,8 @@ describe("Generator", () => {
     });
 
     it("should handle unexpected bigint inputs", () => {
-      equal(generator.next(1n, 1), 37);
-      equal(generator.previous(37n, 1), 1);
+      equal(generator.next(1n, 1), 40);
+      equal(generator.previous(40n, 1), 1);
     });
 
     it("should compute values in mode 1", () => {
@@ -232,11 +232,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 1);
       const prev2 = generator.previous(prev3, 1);
       const prev1 = generator.previous(prev2, 1);
-      equal(next1, 37);
-      equal(next2, 10);
-      equal(next3, 30);
-      equal(prev3, 10);
-      equal(prev2, 37);
+      equal(next1, 40);
+      equal(next2, 37);
+      equal(next3, 13);
+      equal(prev3, 37);
+      equal(prev2, 40);
       equal(prev1, 1);
     });
 
@@ -247,11 +247,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 2);
       const prev2 = generator.previous(prev3, 2);
       const prev1 = generator.previous(prev2, 2);
-      equal(next1, 166);
-      equal(next2, 668);
-      equal(next3, 407);
-      equal(prev3, 668);
-      equal(prev2, 166);
+      equal(next1, 549);
+      equal(next2, 200);
+      equal(next3, 54);
+      equal(prev3, 200);
+      equal(prev2, 549);
       equal(prev1, 1);
     });
 
@@ -262,11 +262,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 3);
       const prev2 = generator.previous(prev3, 3);
       const prev1 = generator.previous(prev2, 3);
-      equal(next1, 48459);
-      equal(next2, 52489);
-      equal(next3, 52981);
-      equal(prev3, 52489);
-      equal(prev2, 48459);
+      equal(next1, 4142);
+      equal(next2, 31929);
+      equal(next3, 28753);
+      equal(prev3, 31929);
+      equal(prev2, 4142);
       equal(prev1, 1);
     });
 
@@ -277,11 +277,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 4);
       const prev2 = generator.previous(prev3, 4);
       const prev1 = generator.previous(prev2, 4);
-      equal(next1, 2057880);
-      equal(next2, 1663445);
-      equal(next3, 44273);
-      equal(prev3, 1663445);
-      equal(prev2, 2057880);
+      equal(next1, 2245);
+      equal(next2, 502285);
+      equal(next3, 768517);
+      equal(prev3, 502285);
+      equal(prev2, 2245);
       equal(prev1, 1);
     });
 
@@ -292,11 +292,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 5);
       const prev2 = generator.previous(prev3, 5);
       const prev1 = generator.previous(prev2, 5);
-      equal(next1, 43629091);
-      equal(next2, 31550254);
-      equal(next3, 21619603);
-      equal(prev3, 31550254);
-      equal(prev2, 43629091);
+      equal(next1, 10120408);
+      equal(next2, 12043413);
+      equal(next3, 16875499);
+      equal(prev3, 12043413);
+      equal(prev2, 10120408);
       equal(prev1, 1);
     });
 
@@ -307,11 +307,11 @@ describe("Generator", () => {
       const prev3 = generator.previous(next3, 6);
       const prev2 = generator.previous(prev3, 6);
       const prev1 = generator.previous(prev2, 6);
-      equal(next1, 1826411712);
-      equal(next2, 2208974623);
-      equal(next3, 871136173);
-      equal(prev3, 2208974623);
-      equal(prev2, 1826411712);
+      equal(next1, 2048965993);
+      equal(next2, 2882355448);
+      equal(next3, 1358781941);
+      equal(prev3, 2882355448);
+      equal(prev2, 2048965993);
       equal(prev1, 1);
     });
 

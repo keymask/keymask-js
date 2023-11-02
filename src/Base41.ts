@@ -1,42 +1,8 @@
-import { KeymaskOptions } from "./index";
-
 const alphabet: string[] = [
   "B", "C", "D", "F", "G", "H", "J", "K", "L", "M", "N",
   "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z",
   "b", "c", "d", "f", "g", "h", "j", "k", "m", "n",
   "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"
-];
-
-const binaryLimits: bigint[] = [
-  0n,
-  32n,
-  1024n,
-  65536n,
-  2097152n,
-  67108864n,
-  4294967296n,
-  137438953472n,
-  4398046511104n,
-  281474976710656n,
-  9007199254740992n,
-  288230376151711740n,
-  18446744073709552000n
-];
-
-const primeLimits: bigint[] = [
-  0n,
-  41n,
-  1021n,
-  65521n,
-  2097143n,
-  67108859n,
-  4294967291n,
-  137438953447n,
-  4398046511093n,
-  281474976710597n,
-  9007199254740881n,
-  288230376151711717n,
-  18446744073709551557n
 ];
 
 const factors: number[] = [
@@ -101,73 +67,26 @@ function restoreBigInt(raw: Uint8Array): bigint {
   return n;
 }
 
-export interface Base41Options extends KeymaskOptions {
-  prime?: boolean;
-  pad?: boolean;
-}
-
 export class Base41 {
   private chars: string[];
-  private outputs: number[];
-  private limits: bigint[];
-  private bigint: boolean;
-  private fluid : boolean;
-  private pad: boolean;
 
-  constructor(options?: Base41Options) {
-    options = options || {};
-
-    const seed = options.seed;
+  constructor(seed?: ArrayBufferLike | ArrayBufferView) {
     if (seed && seed.byteLength !== 24) {
-      throw new RangeError("If seed is provided it must be 24 bytes long.");
+      const seedBuffer = new ArrayBuffer(24);
+      if (ArrayBuffer.isView(seed)) {
+        seed = seed.buffer;
+      }
+      new Uint8Array(seedBuffer).set(new Uint8Array(seed.slice(0, 24)));
+      seed = seedBuffer;
     }
     this.chars = shuffleAlphabet(ArrayBuffer.isView(seed) ? seed.buffer : seed);
-
-    const outputs = options.outputs;
-    if (Array.isArray(outputs)) {
-      this.fluid = false;
-      this.outputs = outputs.filter((output) => output > 0 && output < 13).sort((a, b) => a - b);
-    } else {
-      this.fluid = true;
-      this.outputs = [Math.min(Math.max(outputs || 1, 1), 12)];
-    }
-
-    this.bigint = !!options.bigint;
-    this.limits = options.prime ? primeLimits : binaryLimits;
-    this.pad = options.pad === undefined ? true : options.pad;
   }
 
-  encodingLength(value: number | bigint): number {
-    let length = 12;
-    let output = 0;
-    value = typeof value === "bigint" ? value : BigInt(value);
-    for (let i = 0; i < this.outputs.length; i++) {
-      output = this.outputs[i];
-      if (value < this.limits[output]) {
-        length = output;
-        break;
-      }
-    }
-    if (length === 12 && this.fluid || value >= this.limits[output]) {
-      for (let i = this.outputs[0] + 1; i < 12; i++) {
-        if (value < this.limits[i]) {
-          length = i;
-          break;
-        }
-      }
-    }
-    return length;
-  }
-
-  private encodeValue(value: number | bigint, length: number, pad: boolean): string {
+  private encodeValue(value: number | bigint, length: number): string {
     let n: number;
     let result = "";
 
     for (let i = 0; i < length; i++) {
-      if (!pad && !value && i >= this.outputs[this.outputs.length - 1]) {
-        break;
-      }
-
       if (value) {
         if (typeof value === "bigint") {
           n = Number(value % 41n);
@@ -186,7 +105,7 @@ export class Base41 {
     return result;
   }
 
-  encode(value: number | bigint | ArrayBufferLike | ArrayBufferView, length?: number): string {
+  encode(value: number | bigint | ArrayBufferLike | ArrayBufferView, length: number): string {
     let result = "";
 
     if (typeof value === "object") {
@@ -194,22 +113,19 @@ export class Base41 {
         value = value.buffer;
       }
 
-      const values = new Uint8Array(value);
-      const blocks = new BigUint64Array(Math.ceil(values.length / 8));
-      const bytes = new Uint8Array(blocks.buffer);
-      bytes.set(values);
+      const blocks = new BigUint64Array(Math.ceil(value.byteLength / 8));
+      new Uint8Array(blocks.buffer).set(new Uint8Array(value));
 
-      let final: boolean;
+      const last = blocks.length - 1;
       blocks.forEach((block, index) => {
-        final = index === blocks.length - 1;
         result += this.encodeValue(
           block,
-          final ? length || this.encodingLength(block) : 12,
-          !final || this.pad);
+          index === last ? length : 12,
+        );
       });
 
     } else {
-      result = this.encodeValue(value, length || this.encodingLength(value), this.pad);
+      result = this.encodeValue(value, length);
     }
 
     return result;
@@ -222,7 +138,7 @@ export class Base41 {
       raw[i] = this.chars.indexOf(value.charAt(i));
     }
 
-    if (this.bigint || bigint) {
+    if (bigint) {
       return restoreBigInt(raw);
     }
 
