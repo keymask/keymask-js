@@ -21,10 +21,10 @@ doesn't know the seed to reverse map the encoded values.
 
 ## Motivation
 
-Serial numbers and sequential database IDs are extremely convenient and useful
-for record-keeping, however, when displayed publicly they can leak information
-about system internals, such as how old a given record is, or the frequency of
-record creation (see
+Serial numbers and sequential database IDs are extremely convenient and useful,
+however, when displayed publicly they can leak information about system
+internals, such as how old a given record is, or the frequency of record
+creation (see
 ["German tank problem"](https://search.brave.com/search?q=german+tank+problem)).
 
 `Keymask-Base41` encodes serial numbers in such a way that they can be
@@ -83,7 +83,7 @@ the magnitude of the value.
 
 **Options**
 
-```JavaScript
+```Typescript
 type KeymaskOptions = {
   seed?: ArrayBufferLike | ArrayBufferView;
   size?: number | number[];
