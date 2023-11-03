@@ -90,6 +90,6 @@ export class Keymask {
 
   unmask(value: string): number | bigint {
     const n = this.base41.decode(value);
-    return this.generator.previous(n as (number | bigint), value.length);
+    return this.generator.previous(n, value.length);
   }
 }
