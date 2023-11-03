@@ -1,6 +1,6 @@
 {
   "name": "keymask-base41",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Map sequential IDs or serial numbers to random-looking Base41-encoded strings",
   "type": "module",
   "exports": {
@@ -27,9 +27,6 @@
   },
   "keywords": [
     "LCG",
-    "linear",
-    "congruential",
-    "generator",
     "linear congruential generator",
     "base41",
     "string",
