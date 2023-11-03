@@ -16,30 +16,24 @@ const factors: number[] = [
 
 function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
   const chars = alphabet.slice(0);
-
   if (seed) {
     const source = new DataView(seed);
-    const values = Array.from({ length: 6 }, (_, i) => source.getUint32(i * 4, true));
     let mod = 41;
-    let range: number;
-    let bits: number;
+    let value: number;
     let n: number;
     let swap: string;
-    values.forEach((value, i) => {
-      range = factors[i];
-      bits = value % range;
-
+    factors.forEach((range, i) => {
+      value = source.getUint32(i * 4, true) % range;
       while (range > 1) {
         range /= mod--;
-        n = Math.floor(bits / range);
-        bits %= range;
+        n = Math.floor(value / range);
+        value %= range;
         swap = chars[n];
         chars[n] = chars[mod];
         chars[mod] = swap;
       }
     });
   }
-
   return chars;
 }
 
