@@ -31,10 +31,9 @@ export class Generator {
       if (ArrayBuffer.isView(seed)) {
         seed = seed.buffer;
       }
-      seed = seed.slice(0, 8);
-      const a32 = new Uint32Array(seed);
-      const n32 = a32[0] ^ a32[1];
-      const n64 = new BigUint64Array(seed)[0];
+      const data = new DataView(seed.slice(0, 8));
+      const n32 = data.getUint32(0, true) ^ data.getUint32(4, true);
+      const n64 = data.getBigUint64(0, true);
       this.offsets[1] = n32 % 40;
       this.offsets[2] = n32 % 1020;
       this.offsets[3] = n32 % 65520;
