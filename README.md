@@ -16,7 +16,7 @@ Base41 encoding scheme.
 ```
 
 The Keymask instance can be personalized using a 256-bit seed value. As long as
-you keep this value secret, it will be extremely difficult for anyone who
+this value is kept secret, it will be extremely difficult for anyone who
 doesn't know the seed to reverse map the encoded values.
 
 ## Motivation
@@ -43,11 +43,11 @@ characters. It can therefore be said that Base41 is 25% more efficient than
 hexadecimal and 40% more efficient than decimal, but 20% *less* efficient than
 Base85.)
 
-The primary advantage that Base41 holds over Base85 is that it is free of any
-special characters, which makes it suitable for use in URLs or other places
-where non-alphanumeric characters have special meanings or functions. Base85 is
-more compact, but its output will sometimes need to be further encoded or
-escaped. Base85 encodings are also more difficult to communicate verbally.
+The primary advantage that Base41 holds over Base85 is that it is free of
+special characters, which makes it suitable for use in URLs or anywhere else
+that non-alphanumeric characters have special meanings or functions. Base85 is
+more compact, but its output needs to be further encoded or escaped in such
+settings, which negates its main benefit.
 
 For its part, Base57 (or the somewhat more common Base58) is also free of
 special characters, therefore URL-safe. However, since it includes virtually
@@ -77,7 +77,7 @@ all you need, as it provides a unified interface to the other two.
 The `Keymask` class constructor can be passed an object containing various
 optional settings, as outlined in the following sections. The default
 constructor will create an instance that encodes variable-length outputs (the
-output length will depend on the magnitude of the input value), while decoded
+output length will depend on the magnitude of the input value), and decoded
 values will be returned as either a `number` or a `bigint`, depending again on
 the magnitude of the value.
 
@@ -123,7 +123,7 @@ encoder itself requires `24` bytes.)
 
 Providing a randomized `seed` is highly recommended, as this makes the mappings
 between inputs and outputs extremely difficult to predict (unless you know the
-`seed`). If possible, the `seed` should be kept secret, but it should generally
+`seed`). If possible, the `seed` should be kept secret, and it should generally
 not change for the lifetime of your application (doing so would make it
 impossible to unmask previously masked values).
 
@@ -147,9 +147,9 @@ const unmasked = keymask.unmask(masked); // 123456789
 ### `size`
 
 The output length(s) can be explicitly defined by providing a number or an
-array of numbers to the `size` option. If this is a single number, it defines
-the *minimum* output length; values that exceed this minimum length will scale
-automatically, with additional characters added as needed.
+array of numbers to the `size` option. If a single number is provided, it will
+define the *minimum* output length; values that exceed this minimum length will
+scale automatically, with additional characters added as needed.
 
 If an array of numbers is provided, they represent successive allowable output
 lengths. If the highest provided `size` is less than `12`, then longer outputs
@@ -199,14 +199,15 @@ const unmasked = keymask.unmask(masked); // 123456789n
 
 It is not uncommon for an application to employ multiple serial numbers (for
 example, multiple database tables with auto-incrementing primary keys). In such
-cases, it may be desirable to have them each map to a unique keymask sequence.
+cases, it may be desirable to have each of them map to a unique keymask
+sequence.
 
-One option is to simply instantiate multiple `Keymask` instances, each with a
+One way of doing this is to create multiple `Keymask` instances, each with a
 unique 256-bit seed. A more efficient alternative is to have all of the
 instances share a single `Base41` encoder. The encoder can be seeded once
-(requires a 192-bit seed) and passed into each `Keymask` instance. As a result,
-each instance only requires an additional 64-bit seed to customize the LCG
-sequence.
+(requires a 192-bit seed) and passed into each `Keymask` instance. In
+consequence, each instance only requires an additional 64-bit (8-byte) seed
+to customize the LCG sequence.
 
 **Example (Multiple instances with a shared encoder)**
 
@@ -242,10 +243,10 @@ const mask2c = keymask2.mask(3); // "xmXrp"
 ## Performance
 
 On commodity hardware (2020 M1 Macbook Air), a single invocation of
-`Keymask.mask()` (JIT-compiled) takes on the order of 20 microseconds, whereas
-a tight loop of one million invocations takes an average of between 0.2 and 0.7
-microseconds per call, depending on the output length. This amounts to over a
-million keymasks per second.
+`Keymask.mask()` (JIT-compiled) takes on the order of 10 microseconds, whereas
+a tight loop of one million invocations takes an average of between 0.2 and 0.6
+microseconds per call (depending on the output length). This amounts to well
+over a million keymasks per second.
 
 For best performance, the `Keymask` class instance should be cached for
 repeated usage.

@@ -1,4 +1,5 @@
-import { Base41, Generator } from "./index";
+import { Base41 } from "./Base41";
+import { Generator } from "./Generator";
 
 const limits: bigint[] = [
   0n,
@@ -90,6 +91,6 @@ export class Keymask {
 
   unmask(value: string): number | bigint {
     const n = this.base41.decode(value);
-    return this.generator.previous(n as (number | bigint), value.length);
+    return this.generator.previous(n, value.length);
   }
 }
