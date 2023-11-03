@@ -1,4 +1,5 @@
-import { Base41, Generator } from "./index";
+import { Base41 } from "./Base41";
+import { Generator } from "./Generator";
 
 const limits: bigint[] = [
   0n,
