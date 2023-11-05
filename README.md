@@ -1,8 +1,8 @@
-# Keymask-Base41
+# Keymask (JavaScript)
 
-[![Unit Tests](https://github.com/keymask/keymask-base41/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-base41/actions/workflows/test.yml)
+[![Unit Tests](https://github.com/keymask/keymask-js/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-js/actions/workflows/test.yml)
 
-`Keymask-Base41` is a dependency-free JavaScript (Typescript) utility that maps
+`Keymask` is a dependency-free JavaScript (Typescript) utility that maps
 integers up to 64 bits in length to compact, random-looking character strings.
 
 Values are first transformed by a Linear Congruential Generator so as to
@@ -27,8 +27,8 @@ internals, such as how old a given record is, or the frequency of record
 creation (see
 ["German tank problem"](https://search.brave.com/search?q=german+tank+problem)).
 
-`Keymask-Base41` encodes serial numbers in such a way that they can be
-displayed to end-users without revealing these kinds of details.
+`Keymask` encodes serial numbers in such a way that they can be displayed to
+end-users without revealing these kinds of details.
 
 ## Why Base41?
 
