@@ -37,7 +37,7 @@ function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
   return chars;
 }
 
-export class Base41 {
+export class KeymaskEncoder {
   private chars: string[];
 
   constructor(seed?: ArrayBufferLike | ArrayBufferView) {
