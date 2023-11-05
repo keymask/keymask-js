@@ -1,5 +1,5 @@
 import { equal } from "node:assert/strict";
-import { Base41, Keymask } from "../src/";
+import { KeymaskEncoder, Keymask } from "../src/";
 
 describe("Keymask", () => {
   describe("Default options", () => {
@@ -372,7 +372,7 @@ describe("Keymask", () => {
 
   describe("Given encoder instance", () => {
     const keymask = new Keymask({
-      encoder: new Base41(new Uint8Array([
+      encoder: new KeymaskEncoder(new Uint8Array([
         10, 20, 30, 40, 50, 60, 70, 80,
         11, 21, 31, 41, 51, 61, 71, 81,
         12, 22, 32, 42, 52, 62, 72, 82

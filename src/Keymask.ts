@@ -1,4 +1,4 @@
-import { Base41 } from "./Base41";
+import { KeymaskEncoder } from "./KeymaskEncoder";
 import { Generator } from "./Generator";
 
 const limits: bigint[] = [
@@ -43,11 +43,11 @@ export type KeymaskOptions = {
   seed?: ArrayBufferLike | ArrayBufferView;
   size?: number | number[];
   bigint?: boolean;
-  encoder?: Base41;
+  encoder?: KeymaskEncoder;
 };
 
 export class Keymask {
-  private base41: Base41;
+  private encoder: KeymaskEncoder;
   private generator: Generator;
   private sizes: number[];
 
@@ -55,7 +55,7 @@ export class Keymask {
     options = options || {} as KeymaskOptions;
 
     if (options.encoder) {
-      this.base41 = options.encoder;
+      this.encoder = options.encoder;
       this.generator = new Generator(options.seed, options.bigint);
 
     } else {
@@ -64,13 +64,13 @@ export class Keymask {
         if (ArrayBuffer.isView(seed)) {
           seed = seed.buffer;
         }
-        this.base41 = new Base41(seed.slice(0, 24));
+        this.encoder = new KeymaskEncoder(seed.slice(0, 24));
         this.generator = new Generator(
           seed.byteLength < 32 ? void 0 : seed.slice(24),
           options.bigint
         );
       } else {
-        this.base41 = new Base41();
+        this.encoder = new KeymaskEncoder();
         this.generator = new Generator(void 0, options.bigint);
       }
     }
@@ -86,11 +86,11 @@ export class Keymask {
   mask(value: number | bigint): string {
     const length = encodingLength(value, this.sizes);
     const n = this.generator.next(value, length);
-    return this.base41.encode(n, length);
+    return this.encoder.encode(n, length);
   }
 
   unmask(value: string): number | bigint {
-    const n = this.base41.decode(value);
+    const n = this.encoder.decode(value);
     return this.generator.previous(n, value.length);
   }
 }

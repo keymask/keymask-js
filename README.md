@@ -1,6 +1,7 @@
 # Keymask (JavaScript)
 
-[![Unit Tests](https://github.com/keymask/keymask-js/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-js/actions/workflows/test.yml)
+[![Unit Tests](https://github.com/keymask/keymask-js/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-js/actions/workflows/test.yml) ![npm](https://img.shields.io/npm/v/keymask)
+
 
 `Keymask` is a dependency-free JavaScript (Typescript) utility that maps
 integers up to 64 bits in length to compact, random-looking character strings.
@@ -72,8 +73,9 @@ using your preferred package manager (`npm i keymask`, `yarn add keymask`,
 ## Usage
 
 The module exports three classes, `Keymask`, `Generator` (the LCG) and
-`Base41` (the encoder). For basic use cases, the main `Keymask` class should be
-all you need, as it provides a unified interface to the other two.
+`KeymaskEncoder` (the base41 encoder). For basic use cases, the main `Keymask`
+class should be all you need, as it provides a unified interface to the other
+two.
 
 The `Keymask` class constructor can be passed an object containing various
 optional settings, as outlined in the following sections. The default
@@ -89,14 +91,14 @@ type KeymaskOptions = {
   seed?: ArrayBufferLike | ArrayBufferView;
   size?: number | number[];
   bigint?: boolean;
-  encoder?: Base41;
+  encoder?: KeymaskEncoder;
 };
 ```
 
 **Example (Default settings, no seed, variable outputs)**
 
 ```JavaScript
-import { Keymask } from "keymask-base41";
+import { Keymask } from "keymask";
 
 const keymask = new Keymask();
 
@@ -112,14 +114,14 @@ or an `ArrayBufferView`. Typically, it should be `32` bytes long, as this
 allows both the LCG and the `Base41` encoding to be customized. If it is longer
 than `32` bytes, only the first `32` bytes will be used.
 
-Note, however, that if a preconfigured `Base41` encoder is provided to the
+Note, however, that if a preconfigured `KeymaskEncoder` is provided to the
 `Keymask` constructor (see `encoder` option below), the seed only needs to be
 `8` bytes long, and will be used solely to customize the LCG `Generator`. In
 this case, if more than `8` bytes are provided, only the first `8` bytes will
 be used.
 
 The `seed` should therefore be either `32` or `8` bytes long, depending on
-whether a preconfigured `Base41` encoder is used. (Note that seeding the
+whether a preconfigured `KeymaskEncoder` is used. (Note that seeding the
 encoder itself requires `24` bytes.)
 
 Providing a randomized `seed` is highly recommended, as this makes the mappings
@@ -131,7 +133,7 @@ impossible to unmask previously masked values).
 **Example (Seeded)**
 
 ```JavaScript
-import { Keymask } from "keymask-base41";
+import { Keymask } from "keymask";
 
 const keymask = new Keymask({
   seed: new Uint8Array([
@@ -166,7 +168,7 @@ values.
 **Example (Defined output lengths)**
 
 ```JavaScript
-import { Keymask } from "keymask-base41";
+import { Keymask } from "keymask";
 
 const keymask = new Keymask({
   size: [6, 9]
@@ -186,7 +188,7 @@ then supply the option `bigint: true`.
 **Example (BigInt outputs)**
 
 ```JavaScript
-import { Keymask } from "keymask-base41";
+import { Keymask } from "keymask";
 
 const keymask = new Keymask({
   bigint: true
@@ -205,7 +207,7 @@ sequence.
 
 One way of doing this is to create multiple `Keymask` instances, each with a
 unique 256-bit seed. A more efficient alternative is to have all of the
-instances share a single `Base41` encoder. The encoder can be seeded once
+instances share a single `KeymaskEncoder`. The encoder can be seeded once
 (requires a 192-bit seed) and passed into each `Keymask` instance. In
 consequence, each instance only requires an additional 64-bit (8-byte) seed
 to customize the LCG sequence.
@@ -213,22 +215,22 @@ to customize the LCG sequence.
 **Example (Multiple instances with a shared encoder)**
 
 ```JavaScript
-import { Base41, Keymask } from "keymask-base41";
+import { Keymask, KeymaskEncoder } from "keymask";
 
-const base41 = new Base41(new Uint8Array([
+const sharedEncoder = new KeymaskEncoder(new Uint8Array([
   1, 2, 3, 4, 5, 6, 7, 8,
   9, 10, 11, 12, 13, 14, 15, 16,
   17, 18, 19, 20, 21, 22, 23, 24
 ]));
 
 const keymask1 = new Keymask({
-  encoder: base41,
+  encoder: sharedEncoder,
   seed: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
   size: 5
 });
 
 const keymask2 = new Keymask({
-  encoder: base41,
+  encoder: sharedEncoder,
   seed: new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88]),
   size: 5
 });
