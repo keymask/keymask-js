@@ -65,8 +65,9 @@ character sets, including `O` / `0` and `l` / `I` / `1`.
 
 ## Installation
 
-Install `keymask-base41` in the standard way, using your preferred package
-manager (npm, yarn, pnpm...).
+Releases are published to `npm` as `keymask`. Install the package normally
+using your preferred package manager (`npm i keymask`, `yarn add keymask`,
+`pnpm add keymask`, etc).
 
 ## Usage
 
