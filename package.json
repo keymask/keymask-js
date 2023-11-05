@@ -1,7 +1,7 @@
 {
-  "name": "keymask-base41",
-  "version": "0.4.0",
-  "description": "Map sequential IDs or serial numbers to random-looking Base41-encoded strings",
+  "name": "keymask",
+  "version": "0.5.0",
+  "description": "Map sequential IDs or serial numbers to random-looking strings",
   "type": "module",
   "exports": {
     ".": {
@@ -43,6 +43,11 @@
   ],
   "author": "Adi Turiya <code@turiya.dev>",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keymask/keymask-js.git"
+  },
+  "bugs": "https://github.com/keymask/keymask-js/issues",
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/mocha": "^10.0.3",
