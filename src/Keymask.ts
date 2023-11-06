@@ -17,6 +17,12 @@ const limits: bigint[] = [
   18446744073709551557n
 ];
 
+/**
+ * Determine the encoding length of the provided value.
+ * @param {number | bigint} value The value to be encoded.
+ * @param {number[]} sizes The available encoding lengths.
+ * @returns {number} The smallest available encoding length.
+ */
 function encodingLength(value: number | bigint, sizes: number[]): number {
   let length = 12;
   let size = 0;
@@ -46,11 +52,18 @@ export type KeymaskOptions = {
   encoder?: KeymaskEncoder;
 };
 
+/**
+ * Convert numeric values to and from pseudo-randomized character encodings.
+ */
 export class Keymask {
   private encoder: KeymaskEncoder;
   private generator: Generator;
   private sizes: number[];
 
+  /**
+   * Create a new `Keymask` instance using the provided options.
+   * @param {object} options Keymask options.
+   */
   constructor(options?: KeymaskOptions) {
     options = options || {} as KeymaskOptions;
 
@@ -83,12 +96,22 @@ export class Keymask {
     }
   }
 
+  /**
+   * Mask the provided numeric value.
+   * @param {number | bigint} value The value to mask.
+   * @returns {string} The masked value.
+   */
   mask(value: number | bigint): string {
     const length = encodingLength(value, this.sizes);
     const n = this.generator.next(value, length);
     return this.encoder.encode(n, length);
   }
 
+  /**
+   * Unmask the provided value.
+   * @param {string} value The encoded value to unmask.
+   * @returns {number | bigint} The unmasked numeric value.
+   */
   unmask(value: string): number | bigint {
     const n = this.encoder.decode(value);
     return this.generator.previous(n, value.length);

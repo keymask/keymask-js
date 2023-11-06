@@ -1,6 +1,6 @@
 # Keymask (JavaScript)
 
-[![Unit Tests](https://github.com/keymask/keymask-js/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-js/actions/workflows/test.yml) ![npm](https://img.shields.io/npm/v/keymask)
+[![Unit Tests](https://github.com/keymask/keymask-js/actions/workflows/test.yml/badge.svg)](https://github.com/keymask/keymask-js/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/keymask)](https://www.npmjs.com/package/keymask)
 
 
 `Keymask` is a dependency-free JavaScript (Typescript) utility that maps
@@ -16,8 +16,8 @@ Base41 encoding scheme.
 3 -> "XcCjDG"
 ```
 
-The Keymask instance can be personalized using a 256-bit seed value. As long as
-this value is kept secret, it will be extremely difficult for anyone who
+The `Keymask` instance can be personalized using a 256-bit seed value. As long
+as this value is kept secret, it will be extremely difficult for anyone who
 doesn't know the seed to reverse map the encoded values.
 
 ## Motivation
@@ -33,30 +33,26 @@ end-users without revealing these kinds of details.
 
 ## Why Base41?
 
-**TL;DR:** Efficient, URL-safe, free of visualy similar characters, virtually
-impossible to form recognizable words or phrases.
-
 Base41 is a highly efficient encoding for 16-, 32- and 64-bit values,
 comparable to Base57 or Base85 in this respect. Whereas Base85 encodes 32 bits
-to 5 characters, Base41 requires 6 characters. (Note that the decimal
-representation of a 32-bit value requires 10 characters and the hexadecimal, 8
-characters. It can therefore be said that Base41 is 25% more efficient than
-hexadecimal and 40% more efficient than decimal, but 20% *less* efficient than
-Base85.)
+to 5 characters, Base41 requires 6 characters. (The decimal representation of a
+32-bit value requires 10 characters and the hexadecimal, 8 characters. It can
+therefore be said that Base41 is 25% more efficient than hexadecimal and 40%
+more efficient than decimal, but 20% *less* efficient than Base85.)
 
 The primary advantage that Base41 holds over Base85 is that it is free of
 special characters, which makes it suitable for use in URLs or anywhere else
 that non-alphanumeric characters have special meanings or functions. Base85 is
-more compact, but its output needs to be further encoded or escaped in such
-settings, which negates its main benefit.
+more compact, but in certain situations its output may need to be further
+encoded or escaped, negating its size advantage.
 
 For its part, Base57 (or the somewhat more common Base58) is also free of
 special characters, therefore URL-safe. However, since it includes virtually
 the full range of alphanumeric characters, encoded values can inadvertently
 contain recognizable words, phrases or slang, including potentially offensive
-language. This can be problematic when the encoded values are associated with
-human users (for example, a user id) and visible to them (for example, in the
-URL of their public profile page).
+language. The Base58 encoding of `0x949545` is `rude`, and, needless to say,
+there are even ruder examples. This can be problematic when the encoded values
+are displayed publicly.
 
 Dropping down to Base41 allows us to remove all vowels and numerals from the
 encoding alphabet, which makes it virtually impossible to generate crude or
@@ -74,8 +70,8 @@ using your preferred package manager (`npm i keymask`, `yarn add keymask`,
 
 The module exports three classes, `Keymask`, `Generator` (the LCG) and
 `KeymaskEncoder` (the base41 encoder). For basic use cases, the main `Keymask`
-class should be all you need, as it provides a unified interface to the other
-two.
+class should be all you need, as it provides a unified interface to the
+supporting classes.
 
 The `Keymask` class constructor can be passed an object containing various
 optional settings, as outlined in the following sections. The default

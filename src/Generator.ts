@@ -1,10 +1,8 @@
-/**
- * LCG parameters from https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
- * In each case, the selected parameters are those that are least proximal to
- * low harmonic factors of the modulus (1...8). See `util/harmonics.js`. This
- * means that they are least likely to present repeating patterns across short
- * sequences of values.
- */
+// LCG parameters from https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
+// In each case, the selected parameters are those that are least proximal to
+// low harmonic factors of the modulus (1...8). See `util/harmonics.js`. This
+// means that they are least likely to present repeating patterns across short
+// sequences of values.
 const lcgMap: (number[] | bigint[])[] = [
   [],
   [41, 22, 28],
@@ -21,10 +19,20 @@ const lcgMap: (number[] | bigint[])[] = [
   [18446744073709551557n, 9044836419713972268n, 13891176665706064842n] // 2^64 - 59
 ];
 
+/**
+ * Provides an array of Multiplicative Linear Congruential Generators whose
+ * moduli are compatible with Base41 encoding outputs 1 to 12 characters in
+ * length.
+ */
 export class Generator {
   private offsets: (number | bigint)[];
   private bigint: boolean;
 
+  /**
+   * Create a Generator with custom offsets.
+   * @param {object} seed 8-byte seed value.
+   * @param {boolean} bigint Cast all outputs as BigInt.
+   */
   constructor(seed?: ArrayBufferLike | ArrayBufferView, bigint: boolean = false) {
     this.offsets = new Array(13) as (number | bigint)[];
     if (seed && seed.byteLength >= 8) {
@@ -54,6 +62,12 @@ export class Generator {
     this.bigint = bigint;
   }
 
+  /**
+   * Calculate the next value in the given MLCG sequence.
+   * @param {number | bigint} value The starting value.
+   * @param {number} range The MLCG range (corresponds to encoded output length).
+   * @returns {number | bigint} The next value in the MLCG sequence.
+   */
   next(value: number | bigint, range: number): number | bigint {
     if (!value) {
       return range > 10 || this.bigint ? 0n : 0;
@@ -78,6 +92,12 @@ export class Generator {
     return this.bigint ? BigInt(value) : value;
   }
 
+  /**
+   * Calculate the previous value in the given MLCG sequence.
+   * @param {number | bigint} value The starting value.
+   * @param {number} range The MLCG range (corresponds to encoded output length).
+   * @returns {number | bigint} The previous value in the MLCG sequence.
+   */
   previous(value: number | bigint, range: number): number | bigint {
     if (!value) {
       return range > 10 || this.bigint ? 0n : 0;

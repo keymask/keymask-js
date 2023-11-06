@@ -1,4 +1,4 @@
-import { Keymask, Generator, Base41 } from "../dist/index.js";
+import { Keymask, Generator, KeymaskEncoder } from "../dist/index.js";
 import { performance } from "node:perf_hooks";
 
 const n = 1000000;
@@ -27,12 +27,12 @@ if (test === "generator") {
   console.log("");
 
 } else if (test === "base41") {
-  const base41 = new Base41();
-  base41.encode(1);
+  const encoder = new KeymaskEncoder();
+  encoder.encode(1);
 
   for (let i = 1; i <= n; i++) {
     start = performance.now();
-    base41.encode(i);
+    encoder.encode(i);
     count += performance.now() - start;
   }
 
