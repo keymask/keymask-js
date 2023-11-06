@@ -14,6 +14,12 @@ const factors: number[] = [
   0x1c8cfc00  // 12*11*10*9*8*7*6*5*4*3*2*1
 ];
 
+/**
+ * Shuffle the encoding alphabat using the Fisher-Yates algorithm and the
+ * provided seed.
+ * @param {ArrayBuffer} seed The seed value.
+ * @returns {string[]} The shuffled encoding alphabet.
+ */
 function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
   const chars = alphabet.slice(0);
   if (seed) {
@@ -37,9 +43,16 @@ function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
   return chars;
 }
 
+/**
+ * Base41 encoding and decoding, optionally using a shuffled encoding alphabet.
+ */
 export class KeymaskEncoder {
   private chars: string[];
 
+  /**
+   * Create a new `KeymaskEncoder` using the provided seed.
+   * @param {object} seed The seed value.
+   */
   constructor(seed?: ArrayBufferLike | ArrayBufferView) {
     if (ArrayBuffer.isView(seed)) {
       seed = seed.buffer;
@@ -52,10 +65,15 @@ export class KeymaskEncoder {
     this.chars = shuffleAlphabet(seed);
   }
 
+  /**
+   * Encode a value, using the specified output length.
+   * @param {number | bigint} value The value to be encoded.
+   * @param {number} length The output length.
+   * @returns {string} The encoded value.
+   */
   encode(value: number | bigint, length: number): string {
     let n: number;
     let result = "";
-
     for (let i = 0; i < length; i++) {
       if (value) {
         if (typeof value === "bigint") {
@@ -68,30 +86,29 @@ export class KeymaskEncoder {
       } else {
         n = 0;
       }
-
       result += this.chars[n];
     }
-
     return result;
   }
 
+  /**
+   * Decode the provided value.
+   * @param {string} value The value to be decoded.
+   * @returns {number | bigint} The decoded value.
+   */
   decode(value: string): number | bigint {
     const raw = new Uint8Array(value.length);
-
     for (let i = 0; i < raw.length; i++) {
       raw[i] = this.chars.indexOf(value.charAt(i));
     }
-
     let i = raw.length - 1;
     let n: number | bigint;
-
     if (value.length < 11) {
       n = raw[i--];
       while (i >= 0) {
         n *= 41;
         n += raw[i--];
       }
-
     } else {
       n = BigInt(raw[i--]);
       while (i >= 0) {
@@ -99,7 +116,6 @@ export class KeymaskEncoder {
         n += BigInt(raw[i--]);
       }
     }
-
     return n;
   }
 }

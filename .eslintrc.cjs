@@ -3,20 +3,26 @@ module.exports = {
     node: true,
     es2022: true
   },
+  plugins: [
+    "jsdoc"
+  ],
   extends: [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:jsdoc/recommended"
   ],
   overrides: [
     {
       files: ["src/*.ts", "test/*.ts"],
       parser: "@typescript-eslint/parser",
       plugins: [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "jsdoc"
       ],
       extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:jsdoc/recommended"
       ],
       parserOptions: {
         project: "tsconfig.test.json",
@@ -27,12 +33,14 @@ module.exports = {
       files: ["dist/*.d.ts"],
       parser: "@typescript-eslint/parser",
       plugins: [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "jsdoc"
       ],
       extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:jsdoc/recommended"
       ],
       parserOptions: {
         project: "tsconfig.dist.json",

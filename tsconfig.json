@@ -9,9 +9,7 @@
     "esModuleInterop": false,
     "rootDir": "./src",
     "outDir": "./build",
-    "removeComments": true,
-    "declaration": true,
-    "declarationMap": true
+    "declaration": true
   }
   ,
   "include": ["src/**/*.ts"]

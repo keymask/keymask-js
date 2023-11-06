@@ -1,4 +1,5 @@
 import typescript from "@rollup/plugin-typescript";
+import cleanup from "rollup-plugin-cleanup";
 import { dts } from "rollup-plugin-dts";
 
 export default [
@@ -7,18 +8,19 @@ export default [
     output: [
       {
         file: "dist/index.cjs",
-        format: "cjs",
-        sourcemap: true
+        format: "cjs"
       },
       {
         file: "dist/index.js",
-        format: "esm",
-        sourcemap: true
+        format: "esm"
       }
     ],
     plugins: [
       typescript({
-        exclude: ["**/*.d.ts", "**/*.d.ts.map"]
+        exclude: ["**/*.d.ts"]
+      }),
+      cleanup({
+        comments: "jsdoc"
       })
     ]
   },
