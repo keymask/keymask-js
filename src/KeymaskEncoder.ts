@@ -1,3 +1,5 @@
+import { blockLimit, clampBuffer, padBuffer, toBigInt } from "./bufferUtils";
+
 const alphabet: string[] = [
   "B", "C", "D", "F", "G", "H", "J", "K", "L", "M", "N",
   "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z",
@@ -17,10 +19,10 @@ const factors: number[] = [
 /**
  * Shuffle the encoding alphabat using the Fisher-Yates algorithm and the
  * provided seed.
- * @param {ArrayBuffer} seed The seed value.
+ * @param {?ArrayBuffer} seed The seed value.
  * @returns {string[]} The shuffled encoding alphabet.
  */
-function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
+function shuffleAlphabet(seed?: ArrayBuffer): string[] {
   const chars = alphabet.slice(0);
   if (seed) {
     const source = new DataView(seed);
@@ -44,49 +46,129 @@ function shuffleAlphabet(seed?: ArrayBufferLike): string[] {
 }
 
 /**
- * Base41 encoding and decoding, optionally using a shuffled encoding alphabet.
+ * Encode a numeric value (maximum 53 bits).
+ * @param {number} value The value to encode.
+ * @param {string[]} chars The encoding characters.
+ * @param {?number} length The target output length.
+ * @returns {string} The encoded value.
+ */
+function encodeNumber(value: number, chars: string[], length: number = 0): string {
+  let n: number;
+  let result = "";
+  for (let i = 0; length === 0 && value > 0 || i < length; i++) {
+    if (value) {
+      n = value % 41;
+      value = Math.floor(value / 41);
+    } else {
+      n = 0;
+    }
+    result += chars[n];
+  }
+  return result;
+}
+
+/**
+ * Encode a bigint value (maximum 64 bits).
+ * @param {bigint} value The value to encode.
+ * @param {string[]} chars The encoding characters.
+ * @param {?number} length The target output length.
+ * @returns {string} The encoded value.
+ */
+function encodeBigInt(value: bigint, chars: string[], length: number = 0): string {
+  let n: number;
+  let result = "";
+  for (let i = 0; length === 0 && value > 0n || i < length; i++) {
+    if (value) {
+      n = Number(value % 41n);
+      value /= 41n;
+    } else {
+      n = 0;
+    }
+    result += chars[n];
+  }
+  return result;
+}
+
+/**
+ * Restore a `number` value from raw decoded data.
+ * @param {Uint8Array} values Raw values to be restored.
+ * @returns {number} Restored value.
+ */
+function restoreNumber(values: Uint8Array): number {
+  let i = values.length - 1;
+  let n = values[i--];
+  while (i >= 0) {
+    n *= 41;
+    n += values[i--];
+  }
+  return n;
+}
+
+/**
+ * Restore a `bigint` value from raw decoded data.
+ * @param {Uint8Array} values Raw values to be restored.
+ * @returns {bigint} Restored value.
+ */
+function restoreBigInt(values: Uint8Array): bigint {
+  let i = values.length - 1;
+  let n = BigInt(values[i--]);
+  while (i >= 0) {
+    n *= 41n;
+    n += BigInt(values[i--]);
+  }
+  return n;
+}
+
+/**
+ * Provides base41 `encode` and `decode` functions, optionally using a shuffled
+ * encoding alphabet.
  */
 export class KeymaskEncoder {
   private chars: string[];
 
   /**
-   * Create a new `KeymaskEncoder` using the provided seed.
-   * @param {object} seed The seed value.
+   * Create a new `KeymaskEncoder` using the provided `seed`. If provided, the
+   * `seed` will be used to shuffle the encoding alphabet.
+   * @param {?ArrayBuffer} seed The seed value.
    */
-  constructor(seed?: ArrayBufferLike | ArrayBufferView) {
-    if (ArrayBuffer.isView(seed)) {
-      seed = seed.buffer;
-    }
-    if (seed && seed.byteLength !== 24) {
-      const seedBuffer = new ArrayBuffer(24);
-      new Uint8Array(seedBuffer).set(new Uint8Array(seed.slice(0, 24)));
-      seed = seedBuffer;
-    }
-    this.chars = shuffleAlphabet(seed);
+  constructor(seed?: ArrayBuffer) {
+    this.chars = shuffleAlphabet(seed ? clampBuffer(seed, 24) : seed);
   }
 
   /**
-   * Encode a value, using the specified output length.
-   * @param {number | bigint} value The value to be encoded.
-   * @param {number} length The output length.
+   * Encode the given value as base41.
+   * @param {number | bigint | ArrayBuffer} value The value to encode.
+   * @param {?number} length The target output length in characters. For inputs
+   * greater than 64 bits, this applies to the final encoding block.
    * @returns {string} The encoded value.
    */
-  encode(value: number | bigint, length: number): string {
-    let n: number;
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      if (value) {
-        if (typeof value === "bigint") {
-          n = Number(value % 41n);
-          value /= 41n;
-        } else {
-          n = value % 41;
-          value = Math.floor(value / 41);
+  encode(value: number | bigint | ArrayBuffer, length?: number): string {
+    if (typeof value === "number") {
+      return encodeNumber(value, this.chars, length);
+
+    } else if (typeof value === "bigint") {
+      if (value >= blockLimit) {
+        let result = "";
+        let next: bigint;
+        while (value > 0n) {
+          next = value / blockLimit;
+          result += encodeBigInt(
+            value % blockLimit, this.chars, next > 0n ? 12 : length
+          );
+          value = next;
         }
-      } else {
-        n = 0;
+        return result;
       }
-      result += this.chars[n];
+      return encodeBigInt(value, this.chars, length);
+    }
+    value = padBuffer(value, 8);
+    const data = new DataView(value);
+    const last = Math.ceil(value.byteLength / 8) - 1;
+    let result = "";
+    for (let i = 0; i <= last; i++) {
+      result += encodeBigInt(
+        data.getBigUint64(i * 8, true), this.chars, i < last ? 12 : length
+      );
     }
     return result;
   }
@@ -94,28 +176,33 @@ export class KeymaskEncoder {
   /**
    * Decode the provided value.
    * @param {string} value The value to be decoded.
-   * @returns {number | bigint} The decoded value.
+   * @param {boolean} bigint Convert the result to a `BigInt`.
+   * @returns {number | bigint | ArrayBuffer} The decoded value.
    */
-  decode(value: string): number | bigint {
-    const raw = new Uint8Array(value.length);
-    for (let i = 0; i < raw.length; i++) {
-      raw[i] = this.chars.indexOf(value.charAt(i));
+  decode(value: string, bigint: boolean = false): number | bigint | ArrayBuffer {
+    const length = value.length;
+    let values = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      values[i] = this.chars.indexOf(value.charAt(i));
     }
-    let i = raw.length - 1;
-    let n: number | bigint;
-    if (value.length < 11) {
-      n = raw[i--];
-      while (i >= 0) {
-        n *= 41;
-        n += raw[i--];
-      }
+
+    if (length <= 10 && !bigint) {
+      return restoreNumber(values);
+
+    } else if (length <= 12) {
+      return restoreBigInt(values);
+
     } else {
-      n = BigInt(raw[i--]);
-      while (i >= 0) {
-        n *= 41n;
-        n += BigInt(raw[i--]);
+      values = new Uint8Array(padBuffer(values.buffer, 12));
+      const output = new ArrayBuffer(Math.round(values.byteLength * 2 / 3));
+      const data = new DataView(output);
+      for (let i = 0, j = 0; i < output.byteLength; i += 8, j += 12) {
+        data.setBigUint64(i, restoreBigInt(values.slice(j, j + 12)), true);
       }
+      if (bigint) {
+        return toBigInt(data);
+      }
+      return data.buffer;
     }
-    return n;
   }
 }

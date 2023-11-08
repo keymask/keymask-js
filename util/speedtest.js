@@ -1,9 +1,9 @@
-import { Keymask, Generator, KeymaskEncoder } from "../dist/index.js";
+import { Keymask, KeymaskGenerator, KeymaskEncoder } from "../dist/index.js";
 import { performance } from "node:perf_hooks";
 
 const n = 1000000;
 const length = 6;
-const test = "keymask"; // "generator", "base41"
+const test = "keymask"; // "generator", "encoder"
 
 console.log(n + " iterations");
 console.log("");
@@ -12,7 +12,7 @@ let start;
 let count = 0;
 
 if (test === "generator") {
-  const generator = new Generator();
+  const generator = new KeymaskGenerator();
   generator.next(1, 6);
 
   for (let i = 1; i <= n; i++) {
@@ -21,12 +21,12 @@ if (test === "generator") {
     count += performance.now() - start;
   }
 
-  console.log("Generator");
+  console.log("KeymaskGenerator");
   console.log(count.toFixed(6) + " ms total");
   console.log((count / n).toFixed(6) + " ms per call");
   console.log("");
 
-} else if (test === "base41") {
+} else if (test === "encoder") {
   const encoder = new KeymaskEncoder();
   encoder.encode(1);
 
@@ -36,7 +36,7 @@ if (test === "generator") {
     count += performance.now() - start;
   }
 
-  console.log("Base41");
+  console.log("KeymaskEncoder");
   console.log(count.toFixed(6) + " ms total");
   console.log((count / n).toFixed(6) + " ms per call");
   console.log("");

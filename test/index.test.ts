@@ -1,7 +1,5 @@
 import { equal } from "node:assert/strict";
-import { KeymaskEncoder } from "../src";
-import { Generator } from "../src";
-import { Keymask } from "../src";
+import { Keymask, KeymaskEncoder, KeymaskGenerator } from "../src";
 
 describe("Exports", () => {
   it("should export KeymaskEncoder class", () => {
@@ -9,9 +7,9 @@ describe("Exports", () => {
     equal(typeof new KeymaskEncoder(), "object");
   });
 
-  it("should export Generator class", () => {
-    equal(typeof Generator, "function");
-    equal(typeof new Generator(), "object");
+  it("should export KeymaskGenerator class", () => {
+    equal(typeof KeymaskGenerator, "function");
+    equal(typeof new KeymaskGenerator(), "object");
   });
 
   it("should export Keymask class", () => {
