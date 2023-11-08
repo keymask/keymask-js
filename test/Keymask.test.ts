@@ -1,4 +1,4 @@
-import { equal } from "node:assert/strict";
+import { equal, deepEqual } from "node:assert/strict";
 import { KeymaskEncoder, Keymask } from "../src/";
 
 describe("Keymask", () => {
@@ -88,6 +88,15 @@ describe("Keymask", () => {
       equal(keymask.unmask("DjfkCZLtcBLn"), 288230376151711717n);
       equal(keymask.unmask("YcWfgzxKYXFW"), 18446744073709551556n);
     });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), buffer2);
+    });
   });
 
   describe("Bigint output", () => {
@@ -175,6 +184,15 @@ describe("Keymask", () => {
       equal(keymask.mask(18446744073709551556n), "YcWfgzxKYXFW");
       equal(keymask.unmask("DjfkCZLtcBLn"), 288230376151711717n);
       equal(keymask.unmask("YcWfgzxKYXFW"), 18446744073709551556n);
+    });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), 21345817372864405881847059188222722561n);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), 1832590477950520989195n);
     });
   });
 
@@ -266,6 +284,116 @@ describe("Keymask", () => {
       equal(keymask.unmask("DjfkCZLtcBLn"), 288230376151711717n);
       equal(keymask.unmask("YcWfgzxKYXFW"), 18446744073709551556n);
     });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKhvFMzwX");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKhvFMzwX"), buffer2);
+    });
+  });
+
+  describe("Defined size (full length)", () => {
+    const keymask = new Keymask({
+      size: 12
+    });
+
+    it("should mask and unmask in range 1", () => {
+      equal(keymask.mask(1), "ZvjTZMCCqsWV");
+      equal(keymask.mask(40), "XPJmdCdsZNcZ");
+      equal(keymask.unmask("ZvjTZMCCqsWV"), 1n);
+      equal(keymask.unmask("XPJmdCdsZNcZ"), 40n);
+    });
+
+    it("should mask and unmask in range 2", () => {
+      equal(keymask.mask(41), "zmmGyCghCrXF");
+      equal(keymask.mask(1020), "yrmySCHGGwPG");
+      equal(keymask.unmask("zmmGyCghCrXF"), 41n);
+      equal(keymask.unmask("yrmySCHGGwPG"), 1020n);
+    });
+
+    it("should mask and unmask in range 3", () => {
+      equal(keymask.mask(1021), "XmVStNJHvnmZ");
+      equal(keymask.mask(65520), "DtPbZwWFmJHm");
+      equal(keymask.unmask("XmVStNJHvnmZ"), 1021n);
+      equal(keymask.unmask("DtPbZwWFmJHm"), 65520n);
+    });
+
+    it("should mask and unmask in range 4", () => {
+      equal(keymask.mask(65521), "fQtwtwYvMmCQ");
+      equal(keymask.mask(2097142), "pdKcWrMZpbnp");
+      equal(keymask.unmask("fQtwtwYvMmCQ"), 65521n);
+      equal(keymask.unmask("pdKcWrMZpbnp"), 2097142n);
+    });
+
+    it("should mask and unmask in range 5", () => {
+      equal(keymask.mask(2097143), "QCpxqrPQQFjS");
+      equal(keymask.mask(67108858), "SWfVXvdTzTxL");
+      equal(keymask.unmask("QCpxqrPQQFjS"), 2097143n);
+      equal(keymask.unmask("SWfVXvdTzTxL"), 67108858n);
+    });
+
+    it("should mask and unmask in range 6", () => {
+      equal(keymask.mask(67108859), "sQPqxGgVpMTg");
+      equal(keymask.mask(4294967290), "GCVtGbYdxNcR");
+      equal(keymask.unmask("sQPqxGgVpMTg"), 67108859n);
+      equal(keymask.unmask("GCVtGbYdxNcR"), 4294967290n);
+    });
+
+    it("should mask and unmask in range 7", () => {
+      equal(keymask.mask(4294967291), "fwDNgnZfmGzm");
+      equal(keymask.mask(137438953446), "kWNJwBBwRPrN");
+      equal(keymask.unmask("fwDNgnZfmGzm"), 4294967291n);
+      equal(keymask.unmask("kWNJwBBwRPrN"), 137438953446n);
+    });
+
+    it("should mask and unmask in range 8", () => {
+      equal(keymask.mask(137438953447), "KRxbVNCxGHNj");
+      equal(keymask.mask(4398046511092), "yJSXgzXMjTwQ");
+      equal(keymask.unmask("KRxbVNCxGHNj"), 137438953447n);
+      equal(keymask.unmask("yJSXgzXMjTwQ"), 4398046511092n);
+    });
+
+    it("should mask and unmask in range 9", () => {
+      equal(keymask.mask(4398046511093), "XDCsGMZNXMSm");
+      equal(keymask.mask(281474976710596), "SZdYhtxPDMsh");
+      equal(keymask.unmask("XDCsGMZNXMSm"), 4398046511093n);
+      equal(keymask.unmask("SZdYhtxPDMsh"), 281474976710596n);
+    });
+
+    it("should mask and unmask in range 10", () => {
+      equal(keymask.mask(281474976710597), "vxHvBvzFfpnM");
+      equal(keymask.mask(9007199254740880), "TfZdnmxykSBG");
+      equal(keymask.unmask("vxHvBvzFfpnM"), 281474976710597n);
+      equal(keymask.unmask("TfZdnmxykSBG"), 9007199254740880n);
+    });
+
+    it("should mask and unmask in range 11", () => {
+      equal(keymask.mask(9007199254740881n), "tYKyMyyzYLXZ");
+      equal(keymask.mask(288230376151711716n), "dpwQcNKspJpR");
+      equal(keymask.unmask("tYKyMyyzYLXZ"), 9007199254740881n);
+      equal(keymask.unmask("dpwQcNKspJpR"), 288230376151711716n);
+    });
+
+    it("should mask and unmask in range 12", () => {
+      equal(keymask.mask(288230376151711717n), "DjfkCZLtcBLn");
+      equal(keymask.mask(18446744073709551556n), "YcWfgzxKYXFW");
+      equal(keymask.unmask("DjfkCZLtcBLn"), 288230376151711717n);
+      equal(keymask.unmask("YcWfgzxKYXFW"), 18446744073709551556n);
+    });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKhFJwTNvyShJX");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKhFJwTNvyShJX"), new Uint8Array([
+        11, 22, 33, 44, 55, 66, 77, 88, 99, 0, 0, 0, 0, 0, 0, 0
+      ]).buffer);
+    });
   });
 
   describe("Defined sizes (multiple)", () => {
@@ -356,6 +484,15 @@ describe("Keymask", () => {
       equal(keymask.unmask("DjfkCZLtcBLn"), 288230376151711717n);
       equal(keymask.unmask("YcWfgzxKYXFW"), 18446744073709551556n);
     });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKhMVCZ");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKhMVCZ"), buffer2);
+    });
   });
 
   describe("Empty seed", () => {
@@ -376,10 +513,10 @@ describe("Keymask", () => {
         10, 20, 30, 40, 50, 60, 70, 80,
         11, 21, 31, 41, 51, 61, 71, 81,
         12, 22, 32, 42, 52, 62, 72, 82
-      ])),
+      ]).buffer),
       seed: new Uint8Array([
         13, 23, 33, 43, 53, 63, 73, 83
-      ])
+      ]).buffer
     });
 
     it("should mask and unmask in range 1", () => {
@@ -465,6 +602,15 @@ describe("Keymask", () => {
       equal(keymask.unmask("zcXxvFjvCZvP"), 288230376151711717n);
       equal(keymask.unmask("QwLqQXvtsmYd"), 18446744073709551556n);
     });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "tTxGLKMvKqStrdjpjGNGWsLW");
+      equal(keymask.mask(buffer2), "zHYscNMqWmVTPJ");
+      deepEqual(keymask.unmask("tTxGLKMvKqStrdjpjGNGWsLW"), buffer1);
+      deepEqual(keymask.unmask("zHYscNMqWmVTPJ"), buffer2);
+    });
   });
 
   describe("Seed encoder only", () => {
@@ -473,7 +619,7 @@ describe("Keymask", () => {
         10, 20, 30, 40, 50, 60, 70, 80,
         11, 21, 31, 41, 51, 61, 71, 81,
         12, 22, 32, 42, 52, 62, 72, 82
-      ])
+      ]).buffer
     });
 
     it("should mask and unmask in range 1", () => {
@@ -559,6 +705,15 @@ describe("Keymask", () => {
       equal(keymask.unmask("DdWLFxfjmyfM"), 288230376151711717n);
       equal(keymask.unmask("rmTWnYzPrSKT"), 18446744073709551556n);
     });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "JXBmhmKjgmDLdvWSfWKTbjCB");
+      equal(keymask.mask(buffer2), "tSNPdzbSbSyPqD");
+      deepEqual(keymask.unmask("JXBmhmKjgmDLdvWSfWKTbjCB"), buffer1);
+      deepEqual(keymask.unmask("tSNPdzbSbSyPqD"), buffer2);
+    });
   });
 
   describe("Seed generator and encoder", () => {
@@ -568,7 +723,7 @@ describe("Keymask", () => {
         11, 21, 31, 41, 51, 61, 71, 81,
         12, 22, 32, 42, 52, 62, 72, 82,
         13, 23, 33, 43, 53, 63, 73, 83
-      ])
+      ]).buffer
     });
 
     it("should mask and unmask in range 1", () => {
@@ -653,6 +808,15 @@ describe("Keymask", () => {
       equal(keymask.mask(18446744073709551556n), "QwLqQXvtsmYd");
       equal(keymask.unmask("zcXxvFjvCZvP"), 288230376151711717n);
       equal(keymask.unmask("QwLqQXvtsmYd"), 18446744073709551556n);
+    });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "tTxGLKMvKqStrdjpjGNGWsLW");
+      equal(keymask.mask(buffer2), "zHYscNMqWmVTPJ");
+      deepEqual(keymask.unmask("tTxGLKMvKqStrdjpjGNGWsLW"), buffer1);
+      deepEqual(keymask.unmask("zHYscNMqWmVTPJ"), buffer2);
     });
   });
 });

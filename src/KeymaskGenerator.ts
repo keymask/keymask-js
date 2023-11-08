@@ -1,3 +1,5 @@
+import { clampBuffer } from "./bufferUtils";
+
 // LCG parameters from https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
 // In each case, the selected parameters are those that are least proximal to
 // low harmonic factors of the modulus (1...8). See `util/harmonics.js`. This
@@ -24,22 +26,17 @@ const lcgMap: (number[] | bigint[])[] = [
  * moduli are compatible with Base41 encoding outputs 1 to 12 characters in
  * length.
  */
-export class Generator {
+export class KeymaskGenerator {
   private offsets: (number | bigint)[];
-  private bigint: boolean;
 
   /**
    * Create a Generator with custom offsets.
-   * @param {object} seed 8-byte seed value.
-   * @param {boolean} bigint Cast all outputs as BigInt.
+   * @param {?ArrayBuffer} seed 8-byte seed value.
    */
-  constructor(seed?: ArrayBufferLike | ArrayBufferView, bigint: boolean = false) {
+  constructor(seed?: ArrayBuffer) {
     this.offsets = new Array(13) as (number | bigint)[];
-    if (seed && seed.byteLength >= 8) {
-      if (ArrayBuffer.isView(seed)) {
-        seed = seed.buffer;
-      }
-      const data = new DataView(seed.slice(0, 8));
+    if (seed) {
+      const data = new DataView(clampBuffer(seed, 8));
       const n32 = data.getUint32(0, true) ^ data.getUint32(4, true);
       const n64 = data.getBigUint64(0, true);
       this.offsets[1] = n32 % 40;
@@ -59,18 +56,18 @@ export class Generator {
         this.offsets[i] = i < 6 ? 0 : 0n;
       }
     }
-    this.bigint = bigint;
   }
 
   /**
    * Calculate the next value in the given MLCG sequence.
    * @param {number | bigint} value The starting value.
    * @param {number} range The MLCG range (corresponds to encoded output length).
+   * @param {?boolean} bigint Cast all outputs as BigInt.
    * @returns {number | bigint} The next value in the MLCG sequence.
    */
-  next(value: number | bigint, range: number): number | bigint {
+  next(value: number | bigint, range: number, bigint: boolean = false): number | bigint {
     if (!value) {
-      return range > 10 || this.bigint ? 0n : 0;
+      return range > 10 || bigint ? 0n : 0;
     }
     const mod = lcgMap[range][0];
     const mult = lcgMap[range][1];
@@ -82,25 +79,26 @@ export class Generator {
       }
       value = value * <bigint>mult % <bigint>mod + <bigint>offset;
       value = value < <bigint>mod ? value : value - <bigint>mod + 1n;
-      return range > 10 || this.bigint ? value : Number(value);
+      return range > 10 || bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);
     }
     value = value * <number>mult % <number>mod + <number>offset;
     value = value < <number>mod ? value : value - <number>mod + 1;
-    return this.bigint ? BigInt(value) : value;
+    return bigint ? BigInt(value) : value;
   }
 
   /**
    * Calculate the previous value in the given MLCG sequence.
    * @param {number | bigint} value The starting value.
    * @param {number} range The MLCG range (corresponds to encoded output length).
+   * @param {?boolean} bigint Cast all outputs as BigInt.
    * @returns {number | bigint} The previous value in the MLCG sequence.
    */
-  previous(value: number | bigint, range: number): number | bigint {
+  previous(value: number | bigint, range: number, bigint: boolean = false): number | bigint {
     if (!value) {
-      return range > 10 || this.bigint ? 0n : 0;
+      return range > 10 || bigint ? 0n : 0;
     }
     const mod = lcgMap[range][0];
     const mult = lcgMap[range][2];
@@ -112,13 +110,13 @@ export class Generator {
       }
       value -= <bigint>offset;
       value = (value > 0 ? value : value + <bigint>mod - 1n) * <bigint>mult % <bigint>mod;
-      return range > 10 || this.bigint ? value : Number(value);
+      return range > 10 || bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);
     }
     value -= <number>offset;
     value = (value > 0 ? value : value + <number>mod - 1) * <number>mult % <number>mod;
-    return this.bigint ? BigInt(value) : value;
+    return bigint ? BigInt(value) : value;
   }
 }

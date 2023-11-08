@@ -1,11 +1,11 @@
 import { equal } from "node:assert/strict";
-import { Generator } from "../src/";
+import { KeymaskGenerator } from "../src";
 
-describe("Generator", () => {
+describe("KeymaskGenerator", () => {
 
   describe("Constructor", () => {
     it("should create an instance", () => {
-      const generator = new Generator();
+      const generator = new KeymaskGenerator();
       equal(typeof generator, "object");
       equal(typeof generator.next, "function");
       equal(typeof generator.previous, "function");
@@ -13,7 +13,7 @@ describe("Generator", () => {
   });
 
   describe("No offset", () => {
-    const generator = new Generator();
+    const generator = new KeymaskGenerator();
 
     it("should handle empty inputs", () => {
       equal(generator.next(0, 6), 0);
@@ -209,9 +209,9 @@ describe("Generator", () => {
   });
 
   describe("With offsets", () => {
-    const generator = new Generator(new Uint8Array([
+    const generator = new KeymaskGenerator(new Uint8Array([
       55, 98, 111, 81, 13, 119, 31, 74
-    ]));
+    ]).buffer);
 
     it("should handle empty inputs", () => {
       equal(generator.next(0, 6), 0);
