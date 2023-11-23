@@ -7,9 +7,8 @@
     "lib": ["es2022"],                            
     "strict": true,  
     "esModuleInterop": false,
-    "rootDir": "./",
+    "rootDir": "../",
     "types": ["mocha", "node"]
-  }
-  ,
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  },
+  "include": ["**/*.ts"]
 }

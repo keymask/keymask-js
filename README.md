@@ -56,7 +56,6 @@ the value.
 type KeymaskOptions = {
   seed?: ArrayBuffer;
   size?: number | number[];
-  bigint?: boolean;
   encoder?: KeymaskEncoder;
 };
 ```
@@ -96,10 +95,9 @@ bytes long depending on whether a preconfigured `KeymaskEncoder` is used (see
 are required.
 
 Providing a randomized `seed` is highly recommended, as this makes the mappings
-between inputs and outputs highly unpredictable, especially when the `seed` is
-kept secret. The `seed` should generally not change for the lifetime of your
-application (doing so would make it impossible to unmask previously masked
-values).
+between inputs and outputs highly unpredictable when the `seed` is kept secret.
+The `seed` should generally not change for the lifetime of your application
+(doing so would make it impossible to unmask previously masked values).
 
 **Example (Seeded)**
 
@@ -180,50 +178,17 @@ const masked4 = keymask.mask(new Uint8Array([
 const unmask4 = kaymask.unmask("NpRcJcFtscDkbZZXpWbVyd"); // As above
 ```
 
-### `bigint`
-
-Normally, the return type of the `unmask` operation will depend on the encoding
-range (only 11- or 12-character keymasks will be unmasked as a `bigint`;
-shorter keymasks will be unmasked as a `number` and longer keymasks as an
-`ArrayBuffer`). If you want *all* values to be returned as a `bigint`,
-regardless of their magnitude, then supply the option `bigint: true`.
-
-**Example (BigInt outputs)**
-
-```JavaScript
-import { Keymask } from "keymask";
-
-const keymask = new Keymask({
-  bigint: true
-});
-
-const masked1 = keymask.mask(12n); // "X"
-const unmask1 = keymask.unmask("X"); // 12n
-
-const masked2 = keymask.mask(123456789n); // "wMjMGR"
-const unmask2 = keymask.unmask("wMjMGR"); // 123456789n
-
-const masked3 = keymask.mask(1234567890123456789n); // "csMvrvQsMdVG"
-const unmask3 = keymask.unmask("csMvrvQsMdVG"); // 1234567890123456789n
-
-const masked4 = keymask.mask(new Uint8Array([
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-]).buffer); // "NpRcJcFtscDkTwJXjj"
-
-const unmask4 = kaymask.unmask("NpRcJcFtscDkTwJXjj");
-// 3727165692135864801209549313n
-```
-
 ### `encoder`
 
-It is common for an application to employ multiple serial numbers (for example,
-multiple database tables with auto-incrementing primary keys). In such cases,
-it may be desirable to have each of them map to a unique keymask sequence.
+It is not uncommon for an application to employ multiple serial numbers (for
+example, multiple database tables with auto-incrementing primary keys). In such
+cases, it may be desirable to have each of them map to a unique keymask
+sequence.
 
 One way of doing this is to create multiple `Keymask` instances, each with a
 unique 256-bit seed. A more efficient alternative is to have all of the
 instances share a single `KeymaskEncoder`. The encoder can be seeded once
-(requires a 192-bit seed) and passed into each `Keymask` instance. In
+(requires a single 192-bit seed) and passed into each `Keymask` instance. In
 consequence, each instance only requires an additional 64-bit (8-byte) seed to
 customize the LCG offsets.
 
@@ -259,15 +224,58 @@ const mask2b = keymask2.mask(2); // "RHRkJ"
 const mask2c = keymask2.mask(3); // "xmXrp"
 ```
 
+## Controlling the return type of unmasked values
+
+By default, keymasks that are between 1 and 10 characters long will unmask to a
+`number`, while 11- or 12-character keymasks will be unmasked to a `BigInt` and
+anything longer than 12 characters (=64 bits) will be returned as an
+`ArrayBuffer`. Since there is no way of knowing in advance how long the
+supplied keymask will be, the return type is a union type:
+
+```TypeScript
+type KeymaskData = number | bigint | ArrayBuffer;
+```
+
+There may very well be times when you know the expected return type in advance,
+or you want to explicitly cast the result to a specified type. In such cases,
+you can supply the expected or desired type as the second argument of the
+`unmask()` function. If provided, it must conform to one of the following
+strings:
+
+- `"number"` The result will be returned optimistically as a `number` type (no
+type conversion is done, so be sure to only use this with short keymasks).
+- `"bigint"` The result will be converted to a `BigInt` regardless of its
+magnitude.
+- `"buffer"` The result will be converted to an `ArrayBuffer` regardless of its
+magnitude.
+
+These conversions are type-safe, so when calling from TypeScript, there is no
+need to further cast the result before using it (as is the case with the union
+type).
+
+**Example (Specify the return type)**
+
+```JavaScript
+import { Keymask } from "keymask";
+
+const keymask = new Keymask();
+
+const unmask1 = keymask.unmask("GVSYBp"); // 123456789 as KeymaskData
+const unmask2 = keymask.unmask("GVSYBp", "number"); // 123456789 as number
+const unmask3 = keymask.unmask("GVSYBp", "bigint"); // 123456789n as bigint
+const unmask4 = keymask.unmask("GVSYBp", "buffer");
+// [21, 205, 91, 7, 0, 0, 0] as ArrayBuffer
+```
+
 ## Why Base41?
 
 Base41 is a highly efficient encoding for 16-, 32- and 64-bit values,
-comparable to Base57 or Base85 in this respect. The difference is that Base85
-encodes 32 bits to 5 characters, while Base41 requires 6 characters. By way of
-comparison, the decimal representation of a 32-bit value requires 10 characters
-and the hexadecimal, 8 characters. It can therefore be said that Base41 is 25%
-more efficient than hexadecimal and 40% more efficient than decimal, but 20%
-*less* efficient than Base85.
+comparable to Base57 or Base85 in this respect. Whereas Base85 encodes 32 bits
+to 5 ASCII characters, Base41 requires 6 characters. For comparison, the
+decimal representation of a 32-bit value requires 10 characters and the
+hexadecimal, 8 characters. It can therefore be said that Base41 is 25% more
+efficient than hexadecimal and 40% more efficient than decimal, but 20% *less*
+efficient than Base85.
 
 The primary advantage that Base41 holds over Base85 is that it is free of
 special characters, making it suitable for use in URLs or anywhere else that
@@ -279,11 +287,12 @@ represent a 64-bit value, the same as hexadecimal.
 
 For its part, Base57 (or the somewhat more common Base58) is also free of
 special characters, therefore URL-safe. However, since it includes virtually
-the full range of alphanumeric characters, encoded values can inadvertently
-contain recognizable words, phrases or slang, including potentially offensive
-language. The Base58 encoding of `0x949545` is `rude`, and, needless to say,
-there are even ruder examples. Although such instances are rare, they can be
-problematic when the encoded values are displayed publicly.
+the full range of alphanumeric ASCII characters, encoded values can
+inadvertently contain recognizable words, phrases or slang, including
+potentially offensive language. For example, the Base58 encoding of `0x949545`
+is `rude`, and, needless to say, there are even ruder examples. Although such
+instances are statistically rare, it may be preferable not to display them to
+end-users.
 
 Dropping down to Base41 allows us to remove all vowels and numerals from the
 encoding alphabet, which makes it virtually impossible to generate crude or
