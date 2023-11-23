@@ -1,6 +1,6 @@
 {
   "name": "keymask",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Map sequential IDs or serial numbers to random-looking strings",
   "type": "module",
   "exports": {
@@ -18,7 +18,7 @@
   "scripts": {
     "lint": "eslint ./src/*.ts ./test/*.ts",
     "lint:fix": "eslint --fix ./src/*.ts ./test/*.ts",
-    "test": "TS_NODE_PROJECT=./tsconfig.test.json c8 mocha test",
+    "test": "TS_NODE_PROJECT=./test/tsconfig.json c8 mocha test",
     "build:clean": "rimraf build/* && rimraf dist/*",
     "build:tidy": "rimraf dist/build",
     "build:compile": "tsc",
@@ -50,20 +50,20 @@
   "bugs": "https://github.com/keymask/keymask-js/issues",
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
-    "@types/mocha": "^10.0.4",
-    "@types/node": "^20.9.0",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.9.5",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
     "c8": "^8.0.1",
-    "eslint": "^8.53.0",
-    "eslint-plugin-jsdoc": "^46.8.2",
+    "eslint": "^8.54.0",
+    "eslint-plugin-jsdoc": "^46.9.0",
     "mocha": "^10.2.0",
     "rimraf": "^5.0.5",
-    "rollup": "^4.3.0",
+    "rollup": "^4.5.1",
     "rollup-plugin-cleanup": "^3.2.1",
     "rollup-plugin-dts": "^6.1.0",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   }
 }

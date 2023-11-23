@@ -44,3 +44,18 @@ export function toBigInt(data: DataView): bigint {
   }
   return n;
 }
+
+/**
+ * Convert a numeric value to an ArrayBuffer.
+ * @param {number | bigint} value The value to convert.
+ * @returns {ArrayBuffer} The converted value.
+ */
+export function toBuffer(value: number | bigint): ArrayBuffer {
+  if (typeof value === "number") {
+    value = BigInt(value);
+  }
+  const buffer = new ArrayBuffer(8);
+  const view = new DataView(buffer);
+  view.setBigUint64(0, value, true);
+  return buffer;
+}

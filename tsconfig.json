@@ -10,7 +10,6 @@
     "rootDir": "./src",
     "outDir": "./build",
     "declaration": true
-  }
-  ,
+  },
   "include": ["src/**/*.ts"]
 }
