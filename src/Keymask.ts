@@ -48,43 +48,51 @@ function encodingLength(value: number | bigint, sizes: number[]): number {
 
 export type KeymaskData = number | bigint | ArrayBuffer;
 
-export type KeymaskType = "number" | "bigint" | "buffer" | undefined;
+export type KeymaskType = "number" | "bigint" | "integer" | "buffer" | undefined;
 
 export type KeymaskValue<T extends KeymaskType> =
   T extends "number" ?
     number :
     T extends "bigint" ?
       bigint :
-      T extends "buffer" ?
-        ArrayBuffer :
-        KeymaskData;
+      T extends "integer" ?
+        number | bigint :
+        T extends "buffer" ?
+          ArrayBuffer :
+          KeymaskData;
 
-export type KeymaskOptions = {
+export type KeymaskOptions<T extends KeymaskType> = {
   seed?: ArrayBuffer;
   size?: number | number[];
+  type?: T;
   encoder?: KeymaskEncoder;
 };
 
 /**
  * Convert numeric values to and from pseudo-randomized sequences of characters.
  */
-export class Keymask {
+export class Keymask<T extends KeymaskType> {
   private encoder: KeymaskEncoder;
   private generator: KeymaskGenerator;
   private sizes: number[];
+  private type: T;
 
+  /**
+   * @typedef {"number" | "bigint" | "integer" | "buffer" | undefined} KeymaskType
+   */
   /**
    * @typedef {object} KeymaskOptions
    * @property {?ArrayBuffer} seed The seed value.
    * @property {?(number | number[])} size The minimum encoding size or allowable sizes.
+   * @property {?KeymaskType} type Optionally specify the `unmask()` return type.
    * @property {?KeymaskEncoder} encoder Custom/shared `KeymaskEncoder` instance.
    */
   /**
    * Create a new `Keymask` instance using the provided options.
    * @param {?KeymaskOptions} options Keymask options.
    */
-  constructor(options?: KeymaskOptions) {
-    options = options || {} as KeymaskOptions;
+  constructor(options?: KeymaskOptions<T>) {
+    options = options || {} as KeymaskOptions<T>;
 
     if (options.encoder) {
       this.encoder = options.encoder;
@@ -108,6 +116,8 @@ export class Keymask {
     } else {
       this.sizes = [sizes && sizes > 0 && sizes < 13 ? sizes : 1];
     }
+
+    this.type = options.type as T;
   }
 
   /**
@@ -143,15 +153,11 @@ export class Keymask {
   }
 
   /**
-   * @typedef {"number" | "bigint" | "buffer" | undefined} KeymaskType
-   */
-  /**
    * Unmask the provided value.
    * @param {string} value The encoded value to unmask.
-   * @param {?KeymaskType} type Optionally specify the return type.
    * @returns {number | bigint | ArrayBuffer} The unmasked value.
    */
-  unmask<T extends KeymaskType>(value: string, type?: T): KeymaskValue<T> {
+  unmask(value: string): KeymaskValue<T> {
     const result = this.encoder.decode(value);
     if (result instanceof ArrayBuffer) {
       const data = new DataView(result);
@@ -167,7 +173,7 @@ export class Keymask {
           true
         );
       }
-      if (type === "bigint") {
+      if (this.type === "bigint" || this.type === "integer" && value.length > 10) {
         return toBigInt(data) as KeymaskValue<T>;
       }
       if (length < 12) {
@@ -180,7 +186,7 @@ export class Keymask {
       }
       return result as KeymaskValue<T>;
     }
-    const n = this.generator.previous(result, value.length, type === "bigint");
-    return (type === "buffer" ? toBuffer(n) : n) as KeymaskValue<T>;
+    const n = this.generator.previous(result, value.length, this.type === "bigint");
+    return (this.type === "buffer" ? toBuffer(n) : n) as KeymaskValue<T>;
   }
 }

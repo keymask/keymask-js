@@ -56,6 +56,7 @@ the value.
 type KeymaskOptions = {
   seed?: ArrayBuffer;
   size?: number | number[];
+  type?: "number" | "bigint" | "integer" | "buffer";
   encoder?: KeymaskEncoder;
 };
 ```
@@ -80,7 +81,8 @@ const masked4 = keymask.mask(new Uint8Array([
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 ]).buffer); // "NpRcJcFtscDkyxmQkD"
 
-const unmask4 = kaymask.unmask("NpRcJcFtscDkyxmQkD"); // As above
+const unmask4 = kaymask.unmask("NpRcJcFtscDkyxmQkD");
+// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as ArrayBuffer
 ```
 
 ### `seed`
@@ -124,7 +126,8 @@ const masked4 = keymask.mask(new Uint8Array([
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 ]).buffer); // "FYNGFBkhgnvBChrHQg"
 
-const unmask4 = kaymask.unmask("FYNGFBkhgnvBChrHQg"); // As above
+const unmask4 = kaymask.unmask("FYNGFBkhgnvBChrHQg");
+// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as ArrayBuffer
 ```
 
 ### `size`
@@ -146,7 +149,7 @@ provide the setting `size: 12`, as this will ensure that unmasked values are
 always a multiple of 64 bits long, even when the final block happens to contain
 a value that can be encoded in fewer characters.
 
-Valid `size`s are between `1` and `12`, inclusive. Other values will be
+The `size`(s) should be between `1` and `12`, inclusive. Other values will be
 silently ignored.
 
 This setting should generally not be changed for the lifetime of your
@@ -175,7 +178,55 @@ const masked4 = keymask.mask(new Uint8Array([
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 ]).buffer); // "NpRcJcFtscDkbZZXpWbVyd"
 
-const unmask4 = kaymask.unmask("NpRcJcFtscDkbZZXpWbVyd"); // As above
+const unmask4 = kaymask.unmask("NpRcJcFtscDkbZZXpWbVyd");
+// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as ArrayBuffer
+```
+
+### `type`
+
+By default, keymasks between 1 and 10 characters long will unmask to a
+`number`, while 11- or 12-character keymasks will be unmask to a `BigInt` and
+anything longer than 12 characters (=64 bits) will be returned as an
+`ArrayBuffer`. Since there is no way of knowing in advance how long the
+supplied keymask will be, the return type is a union type:
+
+```TypeScript
+type KeymaskData = number | bigint | ArrayBuffer;
+```
+
+There may very well be times when you know the expected return type in advance,
+or you want to consistently cast the result to a specified type. In such cases,
+you can supply the expected or desired type using the `type` option. If
+provided, it must conform to one of the following strings:
+
+- `"number"` The result will be returned optimistically as a `number` type (no
+type conversion is done, so be sure to only use this with short keymasks).
+- `"bigint"` The result will be converted to a `BigInt` regardless of its
+magnitude.
+- `"integer"` Similar to the default behaviour, but values larger than 64 bits
+will be returned as a `BigInt` rather than an `ArrayBuffer`.
+- `"buffer"` The result will be converted to an `ArrayBuffer` regardless of its
+magnitude.
+
+These conversions are type-safe, so when calling from TypeScript, there is
+generally no need to further cast the result before using it (except for
+`"integer"` which returns a `number | bigint` union type).
+
+**Example (Specify the return type)**
+
+```JavaScript
+import { Keymask } from "keymask";
+
+const defaultKeymask = new Keymask();
+const numberKeymask = new Keymask({ type: "number" });
+const bigintKeymask = new Keymask({ type: "bigint" });
+const bufferKeymask = new Keymask({ type: "buffer" });
+
+const unmask1 = defaultKeymask.unmask("GVSYBp"); // 123456789 as KeymaskData
+const unmask2 = numberKeymask.unmask("GVSYBp"); // 123456789 as number
+const unmask3 = bigintKeymask.unmask("GVSYBp"); // 123456789n as bigint
+const unmask4 = bufferKeymask.unmask("GVSYBp");
+// [21, 205, 91, 7, 0, 0, 0, 0] as ArrayBuffer
 ```
 
 ### `encoder`
@@ -188,8 +239,8 @@ sequence.
 One way of doing this is to create multiple `Keymask` instances, each with a
 unique 256-bit seed. A more efficient alternative is to have all of the
 instances share a single `KeymaskEncoder`. The encoder can be seeded once
-(requires a single 192-bit seed) and passed into each `Keymask` instance. In
-consequence, each instance only requires an additional 64-bit (8-byte) seed to
+(requires a single 192-bit seed) and passed into each `Keymask` instance.
+Consequently, each instance only requires an additional 64-bit (8-byte) seed to
 customize the LCG offsets.
 
 **Example (Multiple instances with a shared encoder)**
@@ -222,49 +273,6 @@ const mask1c = keymask1.mask(3); // "vrMZL"
 const mask2a = keymask2.mask(1); // "LjjWh"
 const mask2b = keymask2.mask(2); // "RHRkJ"
 const mask2c = keymask2.mask(3); // "xmXrp"
-```
-
-## Controlling the return type of unmasked values
-
-By default, keymasks that are between 1 and 10 characters long will unmask to a
-`number`, while 11- or 12-character keymasks will be unmasked to a `BigInt` and
-anything longer than 12 characters (=64 bits) will be returned as an
-`ArrayBuffer`. Since there is no way of knowing in advance how long the
-supplied keymask will be, the return type is a union type:
-
-```TypeScript
-type KeymaskData = number | bigint | ArrayBuffer;
-```
-
-There may very well be times when you know the expected return type in advance,
-or you want to explicitly cast the result to a specified type. In such cases,
-you can supply the expected or desired type as the second argument of the
-`unmask()` function. If provided, it must conform to one of the following
-strings:
-
-- `"number"` The result will be returned optimistically as a `number` type (no
-type conversion is done, so be sure to only use this with short keymasks).
-- `"bigint"` The result will be converted to a `BigInt` regardless of its
-magnitude.
-- `"buffer"` The result will be converted to an `ArrayBuffer` regardless of its
-magnitude.
-
-These conversions are type-safe, so when calling from TypeScript, there is no
-need to further cast the result before using it (as is the case with the union
-type).
-
-**Example (Specify the return type)**
-
-```JavaScript
-import { Keymask } from "keymask";
-
-const keymask = new Keymask();
-
-const unmask1 = keymask.unmask("GVSYBp"); // 123456789 as KeymaskData
-const unmask2 = keymask.unmask("GVSYBp", "number"); // 123456789 as number
-const unmask3 = keymask.unmask("GVSYBp", "bigint"); // 123456789n as bigint
-const unmask4 = keymask.unmask("GVSYBp", "buffer");
-// [21, 205, 91, 7, 0, 0, 0] as ArrayBuffer
 ```
 
 ## Why Base41?
