@@ -405,4 +405,14 @@ describe("KeymaskGenerator", () => {
       equal(prev1, 1n);
     });
   });
+
+  describe("Positive offsets", () => {
+    const generator = new KeymaskGenerator(new Uint8Array([
+      77, 158, 218, 19, 241, 33, 41, 218
+    ]).buffer);
+
+    it("should not produce negative offsets", () => {
+      equal(generator.next(3n, 6, true), 3859134542n);
+    });
+  });
 });

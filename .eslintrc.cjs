@@ -25,7 +25,7 @@ module.exports = {
         "plugin:jsdoc/recommended"
       ],
       parserOptions: {
-        project: "tsconfig.test.json",
+        project: "test/tsconfig.json",
         tsconfigRootDir: __dirname,
       }
     },
