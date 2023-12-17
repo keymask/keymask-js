@@ -37,7 +37,7 @@ export class KeymaskGenerator {
     this.offsets = new Array(13) as (number | bigint)[];
     if (seed) {
       const data = new DataView(clampBuffer(seed, 8));
-      const n32 = data.getUint32(0, true) ^ data.getUint32(4, true);
+      const n32 = (data.getUint32(0, true) ^ data.getUint32(4, true)) >>> 0;
       const n64 = data.getBigUint64(0, true);
       this.offsets[1] = n32 % 40;
       this.offsets[2] = n32 % 1020;
