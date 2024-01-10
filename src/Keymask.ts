@@ -46,20 +46,17 @@ function encodingLength(value: number | bigint, sizes: number[]): number {
   return length;
 }
 
-export type KeymaskData = number | bigint | ArrayBuffer;
+export type KeymaskData = number | bigint | string | ArrayBuffer;
 
-export type KeymaskType = "number" | "bigint" | "integer" | "buffer" | undefined;
+export type KeymaskType = "number" | "bigint" | "string" | "integer" | "buffer" | undefined;
 
 export type KeymaskValue<T extends KeymaskType> =
-  T extends "number" ?
-    number :
-    T extends "bigint" ?
-      bigint :
-      T extends "integer" ?
-        number | bigint :
-        T extends "buffer" ?
-          ArrayBuffer :
-          KeymaskData;
+  T extends "number" ? number
+  : T extends "bigint" ? bigint
+  : T extends "string" ? string
+  : T extends "integer" ? number | bigint
+  : T extends "buffer" ? ArrayBuffer
+  : KeymaskData;
 
 export type KeymaskOptions<T extends KeymaskType> = {
   seed?: ArrayBuffer;
@@ -122,7 +119,7 @@ export class Keymask<T extends KeymaskType> {
 
   /**
    * Mask the provided value.
-   * @param {number | bigint | ArrayBuffer} value The value to mask.
+   * @param {number | bigint | string | ArrayBuffer} value The value to mask.
    * @returns {string} The masked value.
    */
   mask(value: KeymaskData): string {
@@ -144,6 +141,9 @@ export class Keymask<T extends KeymaskType> {
       }
       return this.encoder.encode(data.buffer, length);
     } else {
+      if (typeof value === "string") {
+        value = BigInt(value);
+      }
       length = encodingLength(value, this.sizes);
       return this.encoder.encode(
         this.generator.next(value, length),
@@ -155,7 +155,7 @@ export class Keymask<T extends KeymaskType> {
   /**
    * Unmask the provided value.
    * @param {string} value The encoded value to unmask.
-   * @returns {number | bigint | ArrayBuffer} The unmasked value.
+   * @returns {number | bigint | string | ArrayBuffer} The unmasked value.
    */
   unmask(value: string): KeymaskValue<T> {
     const result = this.encoder.decode(value);
@@ -173,8 +173,13 @@ export class Keymask<T extends KeymaskType> {
           true
         );
       }
-      if (this.type === "bigint" || this.type === "integer" && value.length > 10) {
-        return toBigInt(data) as KeymaskValue<T>;
+      if (
+        this.type === "bigint" ||
+        this.type === "string" ||
+        this.type === "integer" && value.length > 10
+      ) {
+        const n = toBigInt(data);
+        return (this.type === "string" ? n.toString() : n) as KeymaskValue<T>;
       }
       if (length < 12) {
         const bytes = new Uint8Array(result);
@@ -187,6 +192,10 @@ export class Keymask<T extends KeymaskType> {
       return result as KeymaskValue<T>;
     }
     const n = this.generator.previous(result, value.length, this.type === "bigint");
-    return (this.type === "buffer" ? toBuffer(n) : n) as KeymaskValue<T>;
+    return (
+      this.type === "buffer" ? toBuffer(n)
+        : this.type === "string" ? n.toString()
+          : n
+    ) as KeymaskValue<T>;
   }
 }

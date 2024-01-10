@@ -293,6 +293,103 @@ describe("Keymask", () => {
     });
   });
 
+  describe("String output", () => {
+    const keymask = new Keymask({ type: "string" });
+
+    it("should mask and unmask in range 1", () => {
+      equal(keymask.mask("1"), "c");
+      equal(keymask.mask("40"), "Y");
+      equal(keymask.unmask("c"), "1");
+      equal(keymask.unmask("Y"), "40");
+    });
+
+    it("should mask and unmask in range 2", () => {
+      equal(keymask.mask("41"), "PK");
+      equal(keymask.mask("1020"), "sV");
+      equal(keymask.unmask("PK"), "41");
+      equal(keymask.unmask("sV"), "1020");
+    });
+
+    it("should mask and unmask in range 3", () => {
+      equal(keymask.mask("1021"), "Lfc");
+      equal(keymask.mask("65520"), "dhk");
+      equal(keymask.unmask("Lfc"), "1021");
+      equal(keymask.unmask("dhk"), "65520");
+    });
+
+    it("should mask and unmask in range 4", () => {
+      equal(keymask.mask("65521"), "NcPL");
+      equal(keymask.mask("2097142"), "NzPT");
+      equal(keymask.unmask("NcPL"), "65521");
+      equal(keymask.unmask("NzPT"), "2097142");
+    });
+
+    it("should mask and unmask in range 5", () => {
+      equal(keymask.mask("2097143"), "bWGJC");
+      equal(keymask.mask("67108858"), "dnBsV");
+      equal(keymask.unmask("bWGJC"), "2097143");
+      equal(keymask.unmask("dnBsV"), "67108858");
+    });
+
+    it("should mask and unmask in range 6", () => {
+      equal(keymask.mask("67108859"), "WkCBvr");
+      equal(keymask.mask("4294967290"), "mSJnSd");
+      equal(keymask.unmask("WkCBvr"), "67108859");
+      equal(keymask.unmask("mSJnSd"), "4294967290");
+    });
+
+    it("should mask and unmask in range 7", () => {
+      equal(keymask.mask("4294967291"), "ncbyPTV");
+      equal(keymask.mask("137438953446"), "mGJFsQc");
+      equal(keymask.unmask("ncbyPTV"), "4294967291");
+      equal(keymask.unmask("mGJFsQc"), "137438953446");
+    });
+
+    it("should mask and unmask in range 8", () => {
+      equal(keymask.mask("137438953447"), "vwmKZxKZ");
+      equal(keymask.mask("4398046511092"), "GwdjRScK");
+      equal(keymask.unmask("vwmKZxKZ"), "137438953447");
+      equal(keymask.unmask("GwdjRScK"), "4398046511092");
+    });
+
+    it("should mask and unmask in range 9", () => {
+      equal(keymask.mask("4398046511093"), "gqFHjWmxF");
+      equal(keymask.mask("281474976710596"), "wZVHVzvrj");
+      equal(keymask.unmask("gqFHjWmxF"), "4398046511093");
+      equal(keymask.unmask("wZVHVzvrj"), "281474976710596");
+    });
+
+    it("should mask and unmask in range 10", () => {
+      equal(keymask.mask("281474976710597"), "nWRWYwnkhD");
+      equal(keymask.mask("9007199254740880"), "KdCvLBSKJb");
+      equal(keymask.unmask("nWRWYwnkhD"), "281474976710597");
+      equal(keymask.unmask("KdCvLBSKJb"), "9007199254740880");
+    });
+
+    it("should mask and unmask in range 11", () => {
+      equal(keymask.mask("9007199254740881"), "NjQkwmfKKVP");
+      equal(keymask.mask("288230376151711716"), "TQmxMJKgrNW");
+      equal(keymask.unmask("NjQkwmfKKVP"), "9007199254740881");
+      equal(keymask.unmask("TQmxMJKgrNW"), "288230376151711716");
+    });
+
+    it("should mask and unmask in range 12", () => {
+      equal(keymask.mask("288230376151711717"), "DjfkCZLtcBLn");
+      equal(keymask.mask("18446744073709551556"), "YcWfgzxKYXFW");
+      equal(keymask.unmask("DjfkCZLtcBLn"), "288230376151711717");
+      equal(keymask.unmask("YcWfgzxKYXFW"), "18446744073709551556");
+    });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), "21345817372864405881847059188222722561");
+      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), "1832590477950520989195");
+    });
+  });
+
   describe("ArrayBuffer output", () => {
     const keymask = new Keymask({type: "buffer"});
 

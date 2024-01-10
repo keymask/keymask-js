@@ -56,7 +56,7 @@ the value.
 type KeymaskOptions = {
   seed?: ArrayBuffer;
   size?: number | number[];
-  type?: "number" | "bigint" | "integer" | "buffer";
+  type?: "number" | "bigint" | "string" | "integer" | "buffer";
   encoder?: KeymaskEncoder;
 };
 ```
@@ -85,6 +85,11 @@ const unmask4 = kaymask.unmask("NpRcJcFtscDkyxmQkD");
 // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as ArrayBuffer
 ```
 
+Since `v0.9.2`, the input value to the `mask` function can also be provided as
+a `string`. This will be converted internally to a `BigInt` and treated as a
+numeric value. For example, in the above example `keymask.mask("123456789")`
+would also mask to `"wMjMGR"`.
+
 ### `seed`
 
 If a `seed` value is provided, it will be used to initialize LCG offsets
@@ -96,10 +101,10 @@ bytes long depending on whether a preconfigured `KeymaskEncoder` is used (see
 `encoder` option below). When no `encoder` is provided, the full `32` bytes
 are required.
 
-Providing a randomized `seed` is highly recommended, as this makes the mappings
-between inputs and outputs highly unpredictable when the `seed` is kept secret.
-The `seed` should generally not change for the lifetime of your application
-(doing so would make it impossible to unmask previously masked values).
+Providing a randomized `seed` is generally recommended, as this makes the
+mappings between inputs and outputs highly unpredictable. However, the `seed`
+should typically not change for the lifetime of your application, as this would
+render it impossible to unmask previously masked values.
 
 **Example (Seeded)**
 
@@ -191,7 +196,7 @@ anything longer than 12 characters (=64 bits) will be returned as an
 supplied keymask will be, the return type is a union type:
 
 ```TypeScript
-type KeymaskData = number | bigint | ArrayBuffer;
+type KeymaskData = number | bigint | string | ArrayBuffer;
 ```
 
 There may very well be times when you know the expected return type in advance,
@@ -203,6 +208,8 @@ provided, it must conform to one of the following strings:
 type conversion is done, so be sure to only use this with short keymasks).
 - `"bigint"` The result will be converted to a `BigInt` regardless of its
 magnitude.
+- `"string"` The result will be converted to a `BigInt` then cast to a `string`
+regardless of its magnitude.
 - `"integer"` Similar to the default behaviour, but values larger than 64 bits
 will be returned as a `BigInt` rather than an `ArrayBuffer`.
 - `"buffer"` The result will be converted to an `ArrayBuffer` regardless of its
@@ -220,12 +227,14 @@ import { Keymask } from "keymask";
 const defaultKeymask = new Keymask();
 const numberKeymask = new Keymask({ type: "number" });
 const bigintKeymask = new Keymask({ type: "bigint" });
+const stringKeymask = new Keymask({ type: "string" });
 const bufferKeymask = new Keymask({ type: "buffer" });
 
 const unmask1 = defaultKeymask.unmask("GVSYBp"); // 123456789 as KeymaskData
 const unmask2 = numberKeymask.unmask("GVSYBp"); // 123456789 as number
 const unmask3 = bigintKeymask.unmask("GVSYBp"); // 123456789n as bigint
-const unmask4 = bufferKeymask.unmask("GVSYBp");
+const unmask4 = stringKeymask.unmask("GVSYBp"); // "123456789"
+const unmask5 = bufferKeymask.unmask("GVSYBp");
 // [21, 205, 91, 7, 0, 0, 0, 0] as ArrayBuffer
 ```
 
