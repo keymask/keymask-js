@@ -1,6 +1,7 @@
 import { clampBuffer } from "./bufferUtils";
 
 // LCG parameters from https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
+// Errata: https://www.iro.umontreal.ca/~lecuyer/myftp/papers/latrules99Errata.pdf
 // In each case, the selected parameters are those that are least proximal to
 // low harmonic factors of the modulus (1...8). See `util/harmonics.js`. This
 // means that they are least likely to present repeating patterns across short
@@ -8,7 +9,7 @@ import { clampBuffer } from "./bufferUtils";
 const lcgMap: (number[] | bigint[])[] = [
   [],
   [41, 22, 28],
-  [1021, 331, 401], // 2^10 - 3
+  [1021, 65, 377], // 2^10 - 3
   [65521, 17364, 32236], // 2^16 - 15
   [2097143, 1043187, 1352851], // 2^21 - 9
   [67108859, 19552116, 24409594], // 2^26 - 5
