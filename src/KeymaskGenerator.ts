@@ -6,7 +6,7 @@ import { clampBuffer } from "./bufferUtils";
 // low harmonic factors of the modulus (1...8). See `util/harmonics.js`. This
 // means that they are least likely to present repeating patterns across short
 // sequences of values.
-const lcgMap: (number[] | bigint[])[] = [
+const lcgMap41: (number[] | bigint[])[] = [
   [],
   [41, 22, 28],
   [1021, 65, 377], // 2^10 - 3
@@ -22,41 +22,78 @@ const lcgMap: (number[] | bigint[])[] = [
   [18446744073709551557n, 9044836419713972268n, 13891176665706064842n] // 2^64 - 59
 ];
 
+const lcgMap24: (number[] | bigint[])[] = [
+  [],
+  [23, 7, 10],
+  [509, 110, 236], // 2^9 - 3
+  [8191, 1716, 5580], // 2^13 - 1
+  [262139, 92717, 166972], // 2^18 - 5
+  [4194301, 1731287, 2040406], // 2^22 - 3
+  [134217689, 45576512, 70391260], // 2^27 - 39
+  [4294967291n, 1588635695n, 3870709308n], // 2^32 - 5
+  [68719476731n, 40162435147n, 45453986995n], // 2^36 - 5
+  [2199023255531n, 717943173063n, 1319743354064n], // 2^41 - 21
+  [35184372088777n, 11850386302026n, 18586042069168n], // 2^45 - 55
+  [1125899906842597n, 605985299432352n, 791038363307311n], // 2^50 - 27
+  [36028797018963913n, 19708881949174686n, 32182684885571630n], // 2^55 - 55
+  [576460752303423433n, 287514719519235431n, 346764851511064641n], // 2^59 - 55
+  [18446744073709551557n, 9044836419713972268n, 13891176665706064842n] // 2^64 - 59
+];
+
 /**
  * Provides an array of Multiplicative Linear Congruential Generators whose
- * moduli are compatible with Base41 encoding outputs 1 to 12 characters in
- * length.
+ * moduli are compatible with KeymaskEncoder.
  */
 export class KeymaskGenerator {
   private offsets: (number | bigint)[];
+  private safe: boolean;
 
   /**
    * Create a Generator with custom offsets.
    * @param {?ArrayBuffer} seed 8-byte seed value.
+   * @param {?boolean} safe Use safe mode (base24).
    */
-  constructor(seed?: ArrayBuffer) {
-    this.offsets = new Array(13) as (number | bigint)[];
+  constructor(seed?: ArrayBuffer, safe: boolean = false) {
+    this.safe = safe;
+    this.offsets = new Array(safe ? 15 : 13) as (number | bigint)[];
     if (seed) {
       const data = new DataView(clampBuffer(seed, 8));
       const n32 = (data.getUint32(0, true) ^ data.getUint32(4, true)) >>> 0;
       const n64 = data.getBigUint64(0, true);
-      this.offsets[1] = n32 % 40;
-      this.offsets[2] = n32 % 1020;
-      this.offsets[3] = n32 % 65520;
-      this.offsets[4] = n32 % 2097142;
-      this.offsets[5] = n32 % 67108858;
-      this.offsets[6] = BigInt(n32 % 4294967290);
-      this.offsets[7] = n64 % 137438953446n;
-      this.offsets[8] = n64 % 4398046511092n;
-      this.offsets[9] = n64 % 281474976710596n;
-      this.offsets[10] = n64 % 9007199254740880n;
-      this.offsets[11] = n64 % 288230376151711716n;
-      this.offsets[12] = n64 % 18446744073709551556n;
+      if (safe) {
+        for (let i = 1; i < 15; i++) {
+          if (i < 7) {
+            this.offsets[i] = n32 % (<number>lcgMap24[i][0] - 1);
+          } else if (i > 7) {
+            this.offsets[i] = n64 % (<bigint>lcgMap24[i][0] - 1n);
+          } else {
+            this.offsets[7] = BigInt(n32 % 4294967290);
+          }
+        }
+      } else {
+        for (let i = 1; i < 13; i++) {
+          if (i < 6) {
+            this.offsets[i] = n32 % (<number>lcgMap41[i][0] - 1);
+          } else if (i > 6) {
+            this.offsets[i] = n64 % (<bigint>lcgMap41[i][0] - 1n);
+          } else {
+            this.offsets[6] = BigInt(n32 % 4294967290);
+          }
+        }
+      }
+    } else if (safe) {
+      for (let i = 1; i < 15; i++) {
+        this.offsets[i] = i < 7 ? 0 : 0n;
+      }
     } else {
       for (let i = 1; i < 13; i++) {
         this.offsets[i] = i < 6 ? 0 : 0n;
       }
     }
+  }
+
+  bigIntOutput(length: number): boolean {
+    return !this.safe && length > 10 || this.safe && length > 11;
   }
 
   /**
@@ -68,19 +105,20 @@ export class KeymaskGenerator {
    */
   next(value: number | bigint, range: number, bigint: boolean = false): number | bigint {
     if (!value) {
-      return range > 10 || bigint ? 0n : 0;
+      return this.bigIntOutput(range) || bigint ? 0n : 0;
     }
-    const mod = lcgMap[range][0];
-    const mult = lcgMap[range][1];
+    const map = this.safe ? lcgMap24 : lcgMap41;
+    const mod = map[range][0];
+    const mult = map[range][1];
     const offset = this.offsets[range];
 
-    if (range > 5) {
+    if (!this.safe && range > 5 || this.safe && range > 6) {
       if (typeof value === "number") {
         value = BigInt(value);
       }
       value = value * <bigint>mult % <bigint>mod + <bigint>offset;
       value = value < <bigint>mod ? value : value - <bigint>mod + 1n;
-      return range > 10 || bigint ? value : Number(value);
+      return this.bigIntOutput(range) || bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);
@@ -99,19 +137,20 @@ export class KeymaskGenerator {
    */
   previous(value: number | bigint, range: number, bigint: boolean = false): number | bigint {
     if (!value) {
-      return range > 10 || bigint ? 0n : 0;
+      return this.bigIntOutput(range) || bigint ? 0n : 0;
     }
-    const mod = lcgMap[range][0];
-    const mult = lcgMap[range][2];
+    const map = this.safe ? lcgMap24 : lcgMap41
+    const mod = map[range][0];
+    const mult = map[range][2];
     const offset = this.offsets[range];
 
-    if (range > 5) {
+    if (!this.safe && range > 5 || this.safe && range > 6) {
       if (typeof value === "number") {
         value = BigInt(value);
       }
       value -= <bigint>offset;
       value = (value > 0 ? value : value + <bigint>mod - 1n) * <bigint>mult % <bigint>mod;
-      return range > 10 || bigint ? value : Number(value);
+      return this.bigIntOutput(range) || bigint ? value : Number(value);
     }
     if (typeof value === "bigint") {
       value = Number(value);

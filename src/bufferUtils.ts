@@ -27,7 +27,7 @@ export function clampBuffer(buffer: ArrayBuffer, size: number): ArrayBuffer {
     return buffer;
   }
   const clamped = new ArrayBuffer(size);
-  new Uint8Array(clamped).set(new Uint8Array(buffer));
+  new Uint8Array(clamped).set(new Uint8Array(buffer).slice(0, size));
   return clamped;
 }
 
