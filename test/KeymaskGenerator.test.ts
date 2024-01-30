@@ -49,11 +49,11 @@ describe("KeymaskGenerator", () => {
       const prev3 = generator.previous(next3, 2);
       const prev2 = generator.previous(prev3, 2);
       const prev1 = generator.previous(prev2, 2);
-      equal(next1, 331);
-      equal(next2, 314);
-      equal(next3, 813);
-      equal(prev3, 314);
-      equal(prev2, 331);
+      equal(next1, 65);
+      equal(next2, 141);
+      equal(next3, 997);
+      equal(prev3, 141);
+      equal(prev2, 65);
       equal(prev1, 1);
     });
 
@@ -247,11 +247,11 @@ describe("KeymaskGenerator", () => {
       const prev3 = generator.previous(next3, 2);
       const prev2 = generator.previous(prev3, 2);
       const prev1 = generator.previous(prev2, 2);
-      equal(next1, 549);
-      equal(next2, 200);
-      equal(next3, 54);
-      equal(prev3, 200);
-      equal(prev2, 549);
+      equal(next1, 283);
+      equal(next2, 235);
+      equal(next3, 179);
+      equal(prev3, 235);
+      equal(prev2, 283);
       equal(prev1, 1);
     });
 

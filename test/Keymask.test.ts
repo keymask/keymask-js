@@ -13,10 +13,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41), "PK");
-      equal(keymask.mask(1020), "sV");
-      equal(keymask.unmask("PK"), 41);
-      equal(keymask.unmask("sV"), 1020);
+      equal(keymask.mask(41), "LT");
+      equal(keymask.mask(1020), "Rd");
+      equal(keymask.unmask("LT"), 41);
+      equal(keymask.unmask("Rd"), 1020);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -93,9 +93,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
-      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKcK");
       deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
-      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), buffer2);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKcK"), buffer2);
     });
   });
 
@@ -110,10 +110,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41), "PK");
-      equal(keymask.mask(1020), "sV");
-      equal(keymask.unmask("PK"), 41);
-      equal(keymask.unmask("sV"), 1020);
+      equal(keymask.mask(41), "LT");
+      equal(keymask.mask(1020), "Rd");
+      equal(keymask.unmask("LT"), 41);
+      equal(keymask.unmask("Rd"), 1020);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -190,9 +190,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
-      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKcK");
       deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), 21345817372864405881847059188222722561n);
-      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), 1832590477950520989195n);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKcK"), 1832590477950520989195n);
     });
   });
 
@@ -207,10 +207,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41n), "PK");
-      equal(keymask.mask(1020n), "sV");
-      equal(keymask.unmask("PK"), 41n);
-      equal(keymask.unmask("sV"), 1020n);
+      equal(keymask.mask(41n), "LT");
+      equal(keymask.mask(1020n), "Rd");
+      equal(keymask.unmask("LT"), 41n);
+      equal(keymask.unmask("Rd"), 1020n);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -287,9 +287,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
-      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKcK");
       deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), 21345817372864405881847059188222722561n);
-      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), 1832590477950520989195n);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKcK"), 1832590477950520989195n);
     });
   });
 
@@ -304,10 +304,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask("41"), "PK");
-      equal(keymask.mask("1020"), "sV");
-      equal(keymask.unmask("PK"), "41");
-      equal(keymask.unmask("sV"), "1020");
+      equal(keymask.mask("41"), "LT");
+      equal(keymask.mask("1020"), "Rd");
+      equal(keymask.unmask("LT"), "41");
+      equal(keymask.unmask("Rd"), "1020");
     });
 
     it("should mask and unmask in range 3", () => {
@@ -384,9 +384,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
-      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKcK");
       deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), "21345817372864405881847059188222722561");
-      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), "1832590477950520989195");
+      deepEqual(keymask.unmask("HXmKjxGXGXBKcK"), "1832590477950520989195");
     });
   });
 
@@ -407,12 +407,12 @@ describe("Keymask", () => {
     it("should mask and unmask in range 2", () => {
       const buffer1 = new Uint8Array([41, 0, 0, 0, 0, 0, 0, 0]).buffer;
       const buffer2 = new Uint8Array([252, 3, 0, 0, 0, 0, 0, 0]).buffer;
-      equal(keymask.mask(41n), "PK");
-      equal(keymask.mask(1020n), "sV");
-      equal(keymask.mask(buffer1), "PK");
-      equal(keymask.mask(buffer2), "sV");
-      deepEqual(keymask.unmask("PK"), buffer1);
-      deepEqual(keymask.unmask("sV"), buffer2);
+      equal(keymask.mask(41n), "LT");
+      equal(keymask.mask(1020n), "Rd");
+      equal(keymask.mask(buffer1), "LT");
+      equal(keymask.mask(buffer2), "Rd");
+      deepEqual(keymask.unmask("LT"), buffer1);
+      deepEqual(keymask.unmask("Rd"), buffer2);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -529,9 +529,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "NpRcJcFtscDkjdfXLfFWGtqR");
-      equal(keymask.mask(buffer2), "HXmKjxGXGXBKTD");
+      equal(keymask.mask(buffer2), "HXmKjxGXGXBKcK");
       deepEqual(keymask.unmask("NpRcJcFtscDkjdfXLfFWGtqR"), buffer1);
-      deepEqual(keymask.unmask("HXmKjxGXGXBKTD"), buffer2);
+      deepEqual(keymask.unmask("HXmKjxGXGXBKcK"), buffer2);
     });
   });
 
@@ -866,10 +866,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41), "Kq");
-      equal(keymask.mask(1020), "wW");
-      equal(keymask.unmask("Kq"), 41);
-      equal(keymask.unmask("wW"), 1020);
+      equal(keymask.mask(41), "yv");
+      equal(keymask.mask(1020), "Jh");
+      equal(keymask.unmask("yv"), 41);
+      equal(keymask.unmask("Jh"), 1020);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -946,9 +946,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "tTxGLKMvKqStrdjpjGNGWsLW");
-      equal(keymask.mask(buffer2), "zHYscNMqWmVTPJ");
+      equal(keymask.mask(buffer2), "zHYscNMqWmVTGq");
       deepEqual(keymask.unmask("tTxGLKMvKqStrdjpjGNGWsLW"), buffer1);
-      deepEqual(keymask.unmask("zHYscNMqWmVTPJ"), buffer2);
+      deepEqual(keymask.unmask("zHYscNMqWmVTGq"), buffer2);
     });
   });
 
@@ -969,10 +969,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41), "QP");
-      equal(keymask.mask(1020), "gR");
-      equal(keymask.unmask("QP"), 41);
-      equal(keymask.unmask("gR"), 1020);
+      equal(keymask.mask(41), "fq");
+      equal(keymask.mask(1020), "Bv");
+      equal(keymask.unmask("fq"), 41);
+      equal(keymask.unmask("Bv"), 1020);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -1049,9 +1049,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "JXBmhmKjgmDLdvWSfWKTbjCB");
-      equal(keymask.mask(buffer2), "tSNPdzbSbSyPqD");
+      equal(keymask.mask(buffer2), "tSNPdzbSbSyPmP");
       deepEqual(keymask.unmask("JXBmhmKjgmDLdvWSfWKTbjCB"), buffer1);
-      deepEqual(keymask.unmask("tSNPdzbSbSyPqD"), buffer2);
+      deepEqual(keymask.unmask("tSNPdzbSbSyPmP"), buffer2);
     });
   });
 
@@ -1073,10 +1073,10 @@ describe("Keymask", () => {
     });
 
     it("should mask and unmask in range 2", () => {
-      equal(keymask.mask(41), "Kq");
-      equal(keymask.mask(1020), "wW");
-      equal(keymask.unmask("Kq"), 41);
-      equal(keymask.unmask("wW"), 1020);
+      equal(keymask.mask(41), "yv");
+      equal(keymask.mask(1020), "Jh");
+      equal(keymask.unmask("yv"), 41);
+      equal(keymask.unmask("Jh"), 1020);
     });
 
     it("should mask and unmask in range 3", () => {
@@ -1153,9 +1153,9 @@ describe("Keymask", () => {
       const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
       const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
       equal(keymask.mask(buffer1), "tTxGLKMvKqStrdjpjGNGWsLW");
-      equal(keymask.mask(buffer2), "zHYscNMqWmVTPJ");
+      equal(keymask.mask(buffer2), "zHYscNMqWmVTGq");
       deepEqual(keymask.unmask("tTxGLKMvKqStrdjpjGNGWsLW"), buffer1);
-      deepEqual(keymask.unmask("zHYscNMqWmVTPJ"), buffer2);
+      deepEqual(keymask.unmask("zHYscNMqWmVTGq"), buffer2);
     });
   });
 });
