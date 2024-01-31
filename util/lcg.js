@@ -1,9 +1,10 @@
-// Makeshift script to roughly quantify the quality of base41 LCGs.
+// Makeshift script to roughly quantify the quality of small LCGs.
 // Basically this measures the number of flipped bits at each step
 // and picks the full-cycle LCG that comes closest to flipping half
 // the bits at each step, with the smallest standard deviation.
 
-const mod = 41;
+const mod = 23;
+// const mod = 41;
 const steps = mod - 1;
 // const half = steps / 2;
 const halfbits = Math.log2(mod) / 2;
