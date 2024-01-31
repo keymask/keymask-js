@@ -44,10 +44,11 @@ using your preferred package manager (`npm i keymask`, `yarn add keymask`,
 
 ## Usage
 
-The module exports three classes, `Keymask`, `KeymaskGenerator` (the LCG) and
-`KeymaskEncoder` (the character encoder). These can be used independently of
-each other, but for simple use cases, the main `Keymask` class is typically all
-you need.
+The module exports three main classes, `Keymask`, `KeymaskGenerator` (the LCG)
+and `KeymaskEncoder` (the character encoder). These can be used independently
+of each other, but for simple use cases, the main `Keymask` class is typically
+all you need. There is also an additional class, `StrictKeymask` that can be
+used in special cases (described below under the `safe` option).
 
 **Example (Default settings)**
 
@@ -144,7 +145,11 @@ const unmask = keymask.unmask("xMMJdmtCcf"); // 123456789
 
 ### `safe`
 
-Safe mode is triggered using a boolean flag on the options object.
+Safe mode is triggered using a boolean flag on the options object. This
+prevents encoded keymasks from containing any uppercase characters, making it
+suitable for use in case-insensitive settings (such as a subdomain). It also
+increases the block size from 12 to 14, something to bear in mind when
+configuring the output size.
 
 **Example (Safe mode)**
 
@@ -158,6 +163,18 @@ const keymask = new Keymask({
 const masked = keymask.mask(123456789); // "mfwbdg"
 const unmask = keymask.unmask("mfwbdg"); // 123456789
 ```
+
+#### `StrictKeymask`
+
+Some systems, in addition to being case-insensitive, do not allow the first
+character of a string to be a numeral. In these cases, the `StrictKeymask`
+class can be used as a replacement for the main `Keymask` class. This class
+forces `safe` mode, and overrides the `mask` and `unmask` functions so that
+initial numeric characters are replaced with a vowel.
+
+Although this introduces vowels into the encoding, thus the possibility of
+recognizable words, offensive words beginning with `e`, `i`, `o` or `u` (and
+containing no other vowels) are relatively uncommon.
 
 ### `type`
 

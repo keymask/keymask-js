@@ -1,6 +1,6 @@
 {
   "name": "keymask",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Map sequential IDs or serial numbers to random-looking strings",
   "type": "module",
   "exports": {

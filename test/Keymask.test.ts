@@ -1,5 +1,5 @@
 import { equal, deepEqual } from "node:assert/strict";
-import { KeymaskEncoder, Keymask } from "../src/";
+import { KeymaskEncoder, Keymask, StrictKeymask } from "../src/";
 
 describe("Keymask", () => {
   describe("Default options", () => {
@@ -1385,6 +1385,119 @@ describe("Keymask", () => {
       equal(keymask.mask(buffer2), "g7qckgtvcghhh2nc");
       deepEqual(keymask.unmask("zdytzpz79dsffmzyt2fxqpvyxqr5"), buffer1);
       deepEqual(keymask.unmask("g7qckgtvcghhh2nc"), buffer2);
+    });
+  });
+});
+
+describe("StrictKeymask", () => {
+  describe("Default options", () => {
+    const keymask = new StrictKeymask();
+
+    it("should mask and unmask in range 1", () => {
+      equal(keymask.mask(1), "k");
+      equal(keymask.mask(22), "w");
+      equal(keymask.unmask("k"), 1);
+      equal(keymask.unmask("w"), 22);
+    });
+
+    it("should mask and unmask in range 2", () => {
+      equal(keymask.mask(23), "t2");
+      equal(keymask.mask(508), "vw");
+      equal(keymask.unmask("t2"), 23);
+      equal(keymask.unmask("vw"), 508);
+    });
+
+    it("should mask and unmask in range 3", () => {
+      equal(keymask.mask(509), "tbn");
+      equal(keymask.mask(8190), "zhq");
+      equal(keymask.unmask("tbn"), 509);
+      equal(keymask.unmask("zhq"), 8190);
+    });
+
+    it("should mask and unmask in range 4", () => {
+      equal(keymask.mask(8191), "wccd");
+      equal(keymask.mask(262138), "jfjr");
+      equal(keymask.unmask("wccd"), 8191);
+      equal(keymask.unmask("jfjr"), 262138);
+    });
+
+    it("should mask and unmask in range 5", () => {
+      equal(keymask.mask(262139), "tm2wh");
+      equal(keymask.mask(4194300), "tcgpk");
+      equal(keymask.unmask("tm2wh"), 262139);
+      equal(keymask.unmask("tcgpk"), 4194300);
+    });
+
+    it("should mask and unmask in range 6", () => {
+      equal(keymask.mask(4194301), "izn2vj");
+      equal(keymask.mask(134217688), "n7dgfq");
+      equal(keymask.unmask("izn2vj"), 4194301);
+      equal(keymask.unmask("n7dgfq"), 134217688);
+    });
+
+    it("should mask and unmask in range 7", () => {
+      equal(keymask.mask(134217689), "jjc2rjd");
+      equal(keymask.mask(4294967290), "rmrd5ft");
+      equal(keymask.unmask("jjc2rjd"), 134217689);
+      equal(keymask.unmask("rmrd5ft"), 4294967290);
+    });
+
+    it("should mask and unmask in range 8", () => {
+      equal(keymask.mask(4294967291), "ohwj72gt");
+      equal(keymask.mask(68719476730), "wghjnphj");
+      equal(keymask.unmask("ohwj72gt"), 4294967291);
+      equal(keymask.unmask("wghjnphj"), 68719476730);
+    });
+
+    it("should mask and unmask in range 9", () => {
+      equal(keymask.mask(68719476731), "xhkztn29v");
+      equal(keymask.mask(2199023255530), "utfrbg7ps");
+      equal(keymask.unmask("xhkztn29v"), 68719476731);
+      equal(keymask.unmask("utfrbg7ps"), 2199023255530);
+    });
+
+    it("should mask and unmask in range 10", () => {
+      equal(keymask.mask(2199023255531), "wyjnjyf5pn");
+      equal(keymask.mask(35184372088776), "k5tvhvs9zm");
+      equal(keymask.unmask("wyjnjyf5pn"), 2199023255531);
+      equal(keymask.unmask("k5tvhvs9zm"), 35184372088776);
+    });
+
+    it("should mask and unmask in range 11", () => {
+      equal(keymask.mask(35184372088777), "eyqxcwjgcfv");
+      equal(keymask.mask(1125899906842596), "s5xtjhkjzgm");
+      equal(keymask.unmask("eyqxcwjgcfv"), 35184372088777);
+      equal(keymask.unmask("s5xtjhkjzgm"), 1125899906842596);
+    });
+
+    it("should mask and unmask in range 12", () => {
+      equal(keymask.mask(1125899906842597n), "kzd2kmfzbksd");
+      equal(keymask.mask(36028797018963912n), "zxdhgvqmsnxp");
+      equal(keymask.unmask("kzd2kmfzbksd"), 1125899906842597n);
+      equal(keymask.unmask("zxdhgvqmsnxp"), 36028797018963912n);
+    });
+
+    it("should mask and unmask in range 13", () => {
+      equal(keymask.mask(36028797018963913n), "fm7mspv5nt2mq");
+      equal(keymask.mask(576460752303423432n), "dgwh9ks2mj55k");
+      equal(keymask.unmask("fm7mspv5nt2mq"), 36028797018963913n);
+      equal(keymask.unmask("dgwh9ks2mj55k"), 576460752303423432n);
+    });
+
+    it("should mask and unmask in range 14", () => {
+      equal(keymask.mask(576460752303423433n), "cfkgghxwykkjsj");
+      equal(keymask.mask(18446744073709551556n), "xfhpdkrn9fvpxp");
+      equal(keymask.unmask("cfkgghxwykkjsj"), 576460752303423433n);
+      equal(keymask.unmask("xfhpdkrn9fvpxp"), 18446744073709551556n);
+    });
+
+    it("should process binary data", () => {
+      const buffer1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).buffer;
+      const buffer2 = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88, 99]).buffer;
+      equal(keymask.mask(buffer1), "gjph95tz2792txgrfmn9dvvhn9vm");
+      equal(keymask.mask(buffer2), "ixcxhygbpfrvngnm");
+      deepEqual(keymask.unmask("gjph95tz2792txgrfmn9dvvhn9vm"), buffer1);
+      deepEqual(keymask.unmask("ixcxhygbpfrvngnm"), buffer2);
     });
   });
 });

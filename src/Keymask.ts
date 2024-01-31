@@ -120,8 +120,8 @@ export class Keymask<T extends KeymaskType> {
     } else if (options.seed) {
       this.encoder = new KeymaskEncoder(options.seed, options.safe);
       this.generator = new KeymaskGenerator(
-        options.seed.byteLength < (options.safe ? 20 : 32) 
-          ? void 0 
+        options.seed.byteLength < (options.safe ? 20 : 32)
+          ? void 0
           : options.seed.slice(options.safe ? 12 : 24),
         options.safe
       );
@@ -224,5 +224,46 @@ export class Keymask<T extends KeymaskType> {
         : this.type === "string" ? n.toString()
           : n
     ) as KeymaskValue<T>;
+  }
+}
+
+/**
+ * `StrictKeymask` extends the base `Keymask` class, forcing the `safe: true`
+ * option, while also preventing the first character of a keymask from being a
+ * number (replacing it with a vowel if present).
+ */
+export class StrictKeymask<T extends KeymaskType> extends Keymask<T> {
+
+  constructor(options?: KeymaskOptions<T>) {
+    super({ ...options, safe: true });
+  }
+
+  mask(value: KeymaskData): string {
+    const result = super.mask(value);
+    const first = result.charAt(0);
+    return first === "5"
+      ? "e" + result.substring(1)
+      : first === "9"
+        ? "i" + result.substring(1)
+        : first === "7"
+          ? "o" + result.substring(1)
+          : first === "2"
+            ? "u" + result.substring(1)
+            : result;
+  }
+
+  unmask(value: string): KeymaskValue<T> {
+    const first = value.charAt(0);
+    return super.unmask(
+      first === "e"
+        ? "5" + value.substring(1)
+        : first === "i"
+          ? "9" + value.substring(1)
+          : first === "o"
+            ? "7" + value.substring(1)
+            : first === "u"
+              ? "2" + value.substring(1)
+              : value
+    );
   }
 }
